@@ -1,0 +1,52 @@
+add device 1: /dev/input/event2
+  name:     "clearpad"
+  events:
+    KEY (0001): KEY_HOME              KEY_MENU              KEY_BACK             
+    ABS (0003): ABS_MT_SLOT           : value 0, min 0, max 9, fuzz 0, flat 0, resolution 0
+                ABS_MT_TOUCH_MAJOR    : value 0, min 0, max 16, fuzz 0, flat 0, resolution 0
+                ABS_MT_TOUCH_MINOR    : value 0, min 0, max 16, fuzz 0, flat 0, resolution 0
+                ABS_MT_ORIENTATION    : value 0, min -1, max 1, fuzz 0, flat 0, resolution 0
+                ABS_MT_POSITION_X     : value 0, min 0, max 719, fuzz 0, flat 0, resolution 0
+                ABS_MT_POSITION_Y     : value 0, min 0, max 1279, fuzz 0, flat 0, resolution 0
+                ABS_MT_TRACKING_ID    : value 0, min 0, max 65535, fuzz 0, flat 0, resolution 0
+                ABS_MT_PRESSURE       : value 0, min 0, max 255, fuzz 0, flat 0, resolution 0
+  input props:
+    <none>
+
+
+
+
+
+1112-561141: EV_ABS       ABS_MT_TRACKING_ID   00000027            
+1112-561163: EV_ABS       ABS_MT_POSITION_X    000001b7            
+1112-561175: EV_ABS       ABS_MT_POSITION_Y    000001c5            
+1112-561186: EV_ABS       ABS_MT_PRESSURE      0000004e            
+1112-561199: EV_ABS       ABS_MT_TOUCH_MINOR   00000004            
+1112-561214: EV_SYN       SYN_REPORT           00000000            
+1112-578047: EV_ABS       ABS_MT_POSITION_Y    000001c6            
+1112-578065: EV_ABS       ABS_MT_PRESSURE      0000004f            
+1112-578077: EV_ABS       ABS_MT_TOUCH_MAJOR   00000005            
+1112-578091: EV_ABS       ABS_MT_ORIENTATION   00000001            
+1112-578104: EV_SYN       SYN_REPORT           00000000            
+1112-597845: EV_ABS       ABS_MT_POSITION_X    000001b6            
+1112-597863: EV_ABS       ABS_MT_POSITION_Y    000001c7            
+1112-597875: EV_ABS       ABS_MT_PRESSURE      0000003d            
+1112-597886: EV_ABS       ABS_MT_TOUCH_MAJOR   00000004            
+1112-597899: EV_ABS       ABS_MT_ORIENTATION   00000000            
+1112-597910: EV_SYN       SYN_REPORT           00000000            
+1112-613703: EV_ABS       ABS_MT_TRACKING_ID   ffffffff            
+1112-613723: EV_SYN       SYN_REPORT           00000000
+
+0003 0039 00000058
+0003 0035 00000254
+0003 0036 0000020b
+0003 003a 0000004f
+0003 0031 00000004
+0000 0000 00000000
+0003 0035 00000252
+0003 003a 00000050
+0003 0030 00000005
+0003 0034 00000001
+0000 0000 00000000
+0003 0039 ffffffff
+0000 0000 00000000

@@ -32,7 +32,7 @@ public class OverlayView extends View {
 	
 	@Override
 	public boolean onTouchEvent(MotionEvent evt) {
-		Log.d("Testtesttest", "onTouchEvent " + evt.getX() + "," + evt.getY());
+		Log.d("Testtesttest", "onTouchEvent " + evt.getX() + "," + evt.getY() + "," + evt.getAction());
 		return false;
 	}
 	

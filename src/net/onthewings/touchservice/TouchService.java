@@ -1,27 +1,62 @@
 package net.onthewings.touchservice;
 
-import net.pocketmagic.android.eventinjector.Events;
-import net.pocketmagic.android.eventinjector.Events.InputDevice;
+import java.util.LinkedList;
+import java.util.List;
+
 import android.accessibilityservice.AccessibilityService;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 public class TouchService extends AccessibilityService {
 
     private OverlayView mView;
-    private Events events = new Events();
+    //private Events events = new Events();
     
-    void log(String msg) {
+    static void log(String msg) {
     	Log.d("Testtesttest", msg);
+    }
+    
+    static void getBounds(AccessibilityNodeInfo src, List<Rect> results) {
+    	Rect bound = new Rect();
+    	
+    	src.getBoundsInScreen(bound);
+    	results.add(new Rect(bound));
+    	
+    	int childCount = src.getChildCount();
+    	for (int c = 0; c < childCount; ++c) {
+    		AccessibilityNodeInfo child = src.getChild(c);
+    		if (child == null) {
+    			log("get child is null!!!");
+    		} else {
+    			getBounds(child, results);
+    		}
+    	}
+    	
+    	src.recycle();
     }
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
     	log("AccessibilityEvent " + AccessibilityEvent.eventTypeToString(event.getEventType()));
-    	mView.invalidate();
+    	AccessibilityNodeInfo src = event.getSource();
+    	if (src == null){
+    		log("src is null!!!");
+    	} else {
+        	src.getBoundsInScreen(mView.current_bound);
+        	
+        	mView.bounds.clear();
+    		AccessibilityNodeInfo _root = src;
+    		AccessibilityNodeInfo _temp;
+    		while ((_temp = _root.getParent()) != null) _root = _temp;
+    		getBounds(_root, mView.bounds);
+    		
+        	mView.invalidate();
+    	}
     }
 
     @Override
@@ -34,27 +69,29 @@ public class TouchService extends AccessibilityService {
     public void onServiceConnected() {
     	log("onServiceConnected");
     	
-    	for (InputDevice idev:events.m_Devs) {
-	    	String path = idev.getPath();
-	    	if (path.charAt(path.length() - 1) != '2')
-	    		continue;
-	    	
-	    	log("dev: " + idev.getId() + " " + idev.getName());
-	    	Events.intSendEvent(idev.m_nId, 0003, 0x0039, 0x00000058);
-	    	Events.intSendEvent(idev.m_nId, 0003, 0x0035, 0x00000254);
-	    	Events.intSendEvent(idev.m_nId, 0003, 0x0036, 0x0000020b);
-	    	Events.intSendEvent(idev.m_nId, 0003, 0x003a, 0x0000004f);
-	    	Events.intSendEvent(idev.m_nId, 0003, 0x0031, 0x00000004);
-	    	Events.intSendEvent(idev.m_nId, 0000, 0x0000, 0x00000000);
-	    	Events.intSendEvent(idev.m_nId, 0003, 0x0035, 0x00000252);
-	    	Events.intSendEvent(idev.m_nId, 0003, 0x003a, 0x00000050);
-	    	Events.intSendEvent(idev.m_nId, 0003, 0x0030, 0x00000005);
-	    	Events.intSendEvent(idev.m_nId, 0003, 0x0034, 0x00000001);
-	    	Events.intSendEvent(idev.m_nId, 0000, 0x0000, 0x00000000);
-	    	Events.intSendEvent(idev.m_nId, 0003, 0x0039, 0xffffffff);
-	    	Events.intSendEvent(idev.m_nId, 0000, 0x0000, 0x00000000);
-	    	log("dev: " + idev.getId() + " " + idev.getName() + " sent!!!");
-    	}
+//    	for (InputDevice idev:events.m_Devs) {
+//	    	String path = idev.getPath();
+//	    	if (path.charAt(path.length() - 1) != '2')
+//	    		continue;
+//	    	
+//	    	log("dev: " + idev.getId() + " " + idev.getName());
+//	    	/*
+//	    	Events.intSendEvent(idev.m_nId, 0003, 0x0039, 0x00000058);
+//	    	Events.intSendEvent(idev.m_nId, 0003, 0x0035, 0x00000254);
+//	    	Events.intSendEvent(idev.m_nId, 0003, 0x0036, 0x0000020b);
+//	    	Events.intSendEvent(idev.m_nId, 0003, 0x003a, 0x0000004f);
+//	    	Events.intSendEvent(idev.m_nId, 0003, 0x0031, 0x00000004);
+//	    	Events.intSendEvent(idev.m_nId, 0000, 0x0000, 0x00000000);
+//	    	Events.intSendEvent(idev.m_nId, 0003, 0x0035, 0x00000252);
+//	    	Events.intSendEvent(idev.m_nId, 0003, 0x003a, 0x00000050);
+//	    	Events.intSendEvent(idev.m_nId, 0003, 0x0030, 0x00000005);
+//	    	Events.intSendEvent(idev.m_nId, 0003, 0x0034, 0x00000001);
+//	    	Events.intSendEvent(idev.m_nId, 0000, 0x0000, 0x00000000);
+//	    	Events.intSendEvent(idev.m_nId, 0003, 0x0039, 0xffffffff);
+//	    	Events.intSendEvent(idev.m_nId, 0000, 0x0000, 0x00000000);
+//	    	*/
+//	    	log("dev: " + idev.getId() + " " + idev.getName() + " sent!!!");
+//    	}
     }
     
     @Override
@@ -85,20 +122,20 @@ public class TouchService extends AccessibilityService {
         wm.addView(mView, params);
         Log.d("Testtesttest", "addView");
         
-        events.intEnableDebug(1);
-        int eInit = events.Init();
-        log("event.Init() " + eInit);
-        
-
-    	
-    	for (InputDevice idev:events.m_Devs) {
-	    	String path = idev.getPath();
-	    	if (path.charAt(path.length() - 1) != '2')
-	    		continue;
-	    	
-	    	idev.Open(true);
-	    	log("dev: " + idev.getId() + " " + idev.getName() + " " + idev.getOpen());
-    	}
+//        events.intEnableDebug(1);
+//        int eInit = events.Init();
+//        log("event.Init() " + eInit);
+//        
+//
+//    	
+//    	for (InputDevice idev:events.m_Devs) {
+//	    	String path = idev.getPath();
+//	    	if (path.charAt(path.length() - 1) != '2')
+//	    		continue;
+//	    	
+//	    	idev.Open(true);
+//	    	log("dev: " + idev.getId() + " " + idev.getName() + " " + idev.getOpen());
+//    	}
     }
     
     @Override
@@ -106,14 +143,14 @@ public class TouchService extends AccessibilityService {
     	WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
         wm.removeView(mView);
         
-        for (InputDevice idev:events.m_Devs) {
-	    	String path = idev.getPath();
-	    	if (path.charAt(path.length() - 1) != '2')
-	    		continue;
-	    	
-	    	idev.Close();
-    	}
-        
-        events.Release();
+//        for (InputDevice idev:events.m_Devs) {
+//	    	String path = idev.getPath();
+//	    	if (path.charAt(path.length() - 1) != '2')
+//	    		continue;
+//	    	
+//	    	idev.Close();
+//    	}
+//        
+//        events.Release();
     }
 }

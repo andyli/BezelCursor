@@ -1,73 +1,77 @@
 package net.onthewings.touchservice;
 
-import java.util.LinkedList;
-import java.util.List;
+import android.accessibilityservice.AccessibilityService
+import android.graphics.PixelFormat
+import android.graphics.Rect
+import android.util.Log
+import android.view.Gravity
+import android.view.WindowManager
+import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
+import scala.collection.mutable.MutableList
+import android.view.ViewGroup
+import android.content.Context
 
-import android.accessibilityservice.AccessibilityService;
-import android.graphics.PixelFormat;
-import android.graphics.Rect;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.WindowManager;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
+object TouchService {
+	def getBounds(src:AccessibilityNodeInfo, results:MutableList[Rect], level:Int = 10) {
+		if (level > 0) {
+	    	val bound = new Rect()
+	    	
+	    	src.getBoundsInScreen(bound)
+	    	results += new Rect(bound)
+	    	
+	    	var childCount = src.getChildCount()
+	    	for (c <- 0 to childCount) {
+	    		val child = src.getChild(c)
+	    		if (child == null) {
+	    			//log("get child is null!!!")
+	    		} else {
+	    			getBounds(child, results, level - 1)
+	    		}
+	    	}
+		}
+    	
+    	src.recycle()
+    }
+}
 
-public class TouchService extends AccessibilityService {
+class TouchService extends AccessibilityService {
+  
+	def log(msg:String) = {
+		Log.d("Testtesttest", msg)
+	}
 
-    private OverlayView mView;
+    var mView:OverlayView = null
     //private Events events = new Events();
-    
-    static void log(String msg) {
-    	Log.d("Testtesttest", msg);
-    }
-    
-    static void getBounds(AccessibilityNodeInfo src, List<Rect> results) {
-    	Rect bound = new Rect();
-    	
-    	src.getBoundsInScreen(bound);
-    	results.add(new Rect(bound));
-    	
-    	int childCount = src.getChildCount();
-    	for (int c = 0; c < childCount; ++c) {
-    		AccessibilityNodeInfo child = src.getChild(c);
-    		if (child == null) {
-    			log("get child is null!!!");
-    		} else {
-    			getBounds(child, results);
-    		}
-    	}
-    	
-    	src.recycle();
-    }
 
-    @Override
-    public void onAccessibilityEvent(AccessibilityEvent event) {
-    	log("AccessibilityEvent " + AccessibilityEvent.eventTypeToString(event.getEventType()));
-    	AccessibilityNodeInfo src = event.getSource();
+    override def onAccessibilityEvent(event:AccessibilityEvent) = {
+    	log("AccessibilityEvent " + AccessibilityEvent.eventTypeToString(event.getEventType()))
+    	val src = event.getSource()
     	if (src == null){
-    		log("src is null!!!");
+    		log("src is null!!!")
     	} else {
-        	src.getBoundsInScreen(mView.current_bound);
+        	src.getBoundsInScreen(mView.current_bound)
         	
-        	mView.bounds.clear();
-    		AccessibilityNodeInfo _root = src;
-    		AccessibilityNodeInfo _temp;
-    		while ((_temp = _root.getParent()) != null) _root = _temp;
-    		getBounds(_root, mView.bounds);
+        	mView.bounds.clear()
+    		var _root = src
+    		var _temp:AccessibilityNodeInfo = _root.getParent()        	
+    		while (_temp != null) {
+    			_root = _temp
+    			_temp = _root.getParent()
+    		}
+    		TouchService.getBounds(_root, mView.bounds)
     		
-        	mView.invalidate();
+        	mView.invalidate()
     	}
     }
 
-    @Override
-    public void onInterrupt() {
+    override def onInterrupt() = {
     	
     }
     
 
-    @Override
-    public void onServiceConnected() {
-    	log("onServiceConnected");
+    override def onServiceConnected() = {
+    	log("onServiceConnected")
     	
 //    	for (InputDevice idev:events.m_Devs) {
 //	    	String path = idev.getPath();
@@ -94,8 +98,7 @@ public class TouchService extends AccessibilityService {
 //    	}
     }
     
-    @Override
-    public void onCreate() {
+    override def onCreate() = {
         super.onCreate();
         
         Log.d("Testtesttest", "onCreate"); 
@@ -103,9 +106,9 @@ public class TouchService extends AccessibilityService {
         
         mView = new OverlayView(this);
         
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-			WindowManager.LayoutParams.WRAP_CONTENT,
-			WindowManager.LayoutParams.WRAP_CONTENT,
+        var params = new WindowManager.LayoutParams(
+			ViewGroup.LayoutParams.WRAP_CONTENT,
+			ViewGroup.LayoutParams.WRAP_CONTENT,
 			WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
 			
 			WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -117,10 +120,10 @@ public class TouchService extends AccessibilityService {
 			PixelFormat.RGBA_8888
         );
         params.gravity = Gravity.FILL;
-        WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+        val wm = getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager]
         
-        wm.addView(mView, params);
-        Log.d("Testtesttest", "addView");
+        wm.addView(mView, params)
+        Log.d("Testtesttest", "addView")
         
 //        events.intEnableDebug(1);
 //        int eInit = events.Init();
@@ -138,9 +141,8 @@ public class TouchService extends AccessibilityService {
 //    	}
     }
     
-    @Override
-    public void onDestroy() {
-    	WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+    override def onDestroy() = {
+    	val wm = getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager]
         wm.removeView(mView);
         
 //        for (InputDevice idev:events.m_Devs) {

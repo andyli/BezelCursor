@@ -9,13 +9,15 @@ import android.view.DragEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
-import scala.collection.mutable.MutableList
+import scala.collection.mutable.ListBuffer
+import scala.collection.JavaConversions._
+import java.util.LinkedList
 
 class OverlayView(service:TouchService) extends View(service) {
-	var current_bound = new Rect()
-	var bounds = new MutableList[Rect]()
-	var current_paint = new Paint()
-	var paint = new Paint()
+	val current_bound = new Rect()
+	val bounds = new LinkedList[Rect]()
+	val current_paint = new Paint()
+	val paint = new Paint()
 
 	paint.setColor(Color.WHITE)
 	paint.setStrokeWidth(2)

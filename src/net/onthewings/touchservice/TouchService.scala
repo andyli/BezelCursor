@@ -8,58 +8,84 @@ import android.view.Gravity
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import scala.collection.mutable.MutableList
 import android.view.ViewGroup
 import android.content.Context
-
-object TouchService {
-	def getBounds(src:AccessibilityNodeInfo, results:MutableList[Rect], level:Int = 10) {
-		if (level > 0) {
-	    	val bound = new Rect()
-	    	
-	    	src.getBoundsInScreen(bound)
-	    	results += new Rect(bound)
-	    	
-	    	var childCount = src.getChildCount()
-	    	for (c <- 0 to childCount) {
-	    		val child = src.getChild(c)
-	    		if (child == null) {
-	    			//log("get child is null!!!")
-	    		} else {
-	    			getBounds(child, results, level - 1)
-	    		}
-	    	}
-		}
-    	
-    	src.recycle()
-    }
-}
+import scala.collection.mutable.ListBuffer
+import scala.collection.JavaConversions._
+import java.util.List
+import java.util.LinkedList
+import java.util.ArrayList
 
 class TouchService extends AccessibilityService {
   
 	def log(msg:String) = {
 		Log.d("Testtesttest", msg)
 	}
+	
+//	@scala.annotation.tailrec
+//	final def getBounds(srcList:ListBuffer[AccessibilityNodeInfo], results:ListBuffer[Rect]):Unit = {
+//    	val bound = new Rect()
+//    	
+//    	val children = new ListBuffer[AccessibilityNodeInfo]();
+//    	for (src <- srcList) {
+//	    	src.getBoundsInScreen(bound)
+//	    	//results += new Rect(bound)
+//	    	
+//	    	for (c <- 0 to src.getChildCount()) {
+//	    		val child = src.getChild(c)
+//	    		if (child == null) {
+//	    			//log("get child is null!!!")
+//	    		} else {
+//	    			children += src.getChild(c)
+//	    		}
+//	    	}
+//	    	src.recycle()
+//    	}
+//    	srcList.clear()
+//    	
+//    	getBounds(children, results);
+//    }
+	
+	final def getBounds(src:AccessibilityNodeInfo, results:List[Rect]):Unit = {
+    	val bound = new Rect()
+    	
+    	src.getBoundsInScreen(bound)
+    	results.add(new Rect(bound))
+    	
+    	val childCount = src.getChildCount()
+    	var c = 0
+    	while (c < childCount) {
+    		val child = src.getChild(c)
+    		if (child != null) {
+    			getBounds(child, results)
+    		} /*else {
+    			log("get child is null!!!")
+    		}*/
+    		c += 1
+    	}
+    	
+    	src.recycle()
+    }
 
     var mView:OverlayView = null
     //private Events events = new Events();
 
     override def onAccessibilityEvent(event:AccessibilityEvent) = {
     	log("AccessibilityEvent " + AccessibilityEvent.eventTypeToString(event.getEventType()))
+    	
     	val src = event.getSource()
-    	if (src == null){
-    		log("src is null!!!")
-    	} else {
+    	if (src != null){
         	src.getBoundsInScreen(mView.current_bound)
         	
         	mView.bounds.clear()
     		var _root = src
-    		var _temp:AccessibilityNodeInfo = _root.getParent()        	
+    		var _temp:AccessibilityNodeInfo = _root.getParent()
     		while (_temp != null) {
+    			if (_root != src) _root.recycle()
     			_root = _temp
     			_temp = _root.getParent()
     		}
-    		TouchService.getBounds(_root, mView.bounds)
+        	getBounds(_root, mView.bounds)
     		
         	mView.invalidate()
     	}
@@ -106,7 +132,7 @@ class TouchService extends AccessibilityService {
         
         mView = new OverlayView(this);
         
-        var params = new WindowManager.LayoutParams(
+        val params = new WindowManager.LayoutParams(
 			ViewGroup.LayoutParams.WRAP_CONTENT,
 			ViewGroup.LayoutParams.WRAP_CONTENT,
 			WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,

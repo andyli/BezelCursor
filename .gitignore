@@ -41,3 +41,7 @@ proguard/
 *.ipr
 *.iws
 .idea/
+
+.cache
+proguard_cache
+scala_library.min.jar

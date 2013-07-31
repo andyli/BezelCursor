@@ -23,11 +23,7 @@
 
 #include <android/log.h>
 #define TAG "TouchService::JNI"
-#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG  , TAG, __VA_ARGS__) 
-#define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, TAG, __VA_ARGS__)
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__)
-#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, TAG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, TAG, __VA_ARGS__)
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG  , TAG, "%s", __VA_ARGS__)
 
 #ifdef __cplusplus
 extern "C" {
@@ -130,9 +126,9 @@ static int open_device(int index)
 	if (index >= ioDevices.size()) return -1;
 
 	debug("open_device prep to open");
-	char *device = pDevs[index].device_path;
+	std::string device = ioDevices[index].device_path;
 	
-	debug("open_device call %s", device);
+	debug("open_device call %s", device.c_str());
     int version;
     int fd;
     
@@ -141,26 +137,26 @@ static int open_device(int index)
     char idstr[80];
     struct input_id id;
 	
-    fd = open(device, O_RDWR);
+    fd = open(device.c_str(), O_RDWR);
     if(fd < 0) {
-		pDevs[index].ufds.fd = -1;
+    	ioDevices[index].ufds.fd = -1;
 		
-		pDevs[index].device_name = NULL;
-		debug("could not open %s, %s", device, strerror(errno));
+    	ioDevices[index].device_name = "";
+		debug("could not open %s, %s", device.c_str(), strerror(errno));
         return -1;
     }
     
-	pDevs[index].ufds.fd = fd;
+    ioDevices[index].ufds.fd = fd;
 	ufds[index].fd = fd;
 	
     name[sizeof(name) - 1] = '\0';
     if(ioctl(fd, EVIOCGNAME(sizeof(name) - 1), &name) < 1) {
-        debug("could not get device name for %s, %s", device, strerror(errno));
+        debug("could not get device name for %s, %s", device.c_str(), strerror(errno));
         name[0] = '\0';
     }
-	debug("Device %d: %s: %s", ioDevices.size(), device, name);
+	debug("Device %d: %s: %s", ioDevices.size(), device.c_str(), name);
 	
-	pDevs[index].device_name = strdup(name);
+	ioDevices[index].device_name = strdup(name);
     
     
     return 0;
@@ -191,17 +187,14 @@ static int scan_dir(const char *dirname)
         strcpy(filename, de->d_name);
 		debug("scan_dir:prepare to open:%s", devname);
 		// add new filename to our structure: devname
+		pollfd ufd;
+		ufd.events = POLLIN;
+		ufds.push_back(ufd);
 		
-		struct pollfd *new_ufds = realloc(ufds, sizeof(ufds[0]) * (ioDevices.size() + 1));
-		if(new_ufds == NULL) {
-			debug("out of memory");
-			return -1;
-		}
-		ufds = new_ufds; 
-		ufds[ioDevices.size()].events = POLLIN;
-		
-		pDevs[ioDevices.size()].ufds.events = POLLIN;
-		pDevs[ioDevices.size()].device_path = strdup(devname);
+		IoDevice dev;
+		dev.ufds.events = POLLIN;
+		dev.device_path = strdup(devname);
+		ioDevices.push_back(dev);
 
     }
     closedir(dir);
@@ -209,13 +202,13 @@ static int scan_dir(const char *dirname)
 } 
 
 jint Java_net_onthewings_touchservice_AndroidEvents_intSendEvent(JNIEnv* env,jobject thiz, jint index, uint16_t type, uint16_t code, int32_t value) {
-	if (index >= ioDevices.size() || pDevs[index].ufds.fd == -1) return -1;
-	int fd = pDevs[index].ufds.fd;
+	if (index >= ioDevices.size() || ioDevices[index].ufds.fd == -1) return -1;
+	int fd = ioDevices[index].ufds.fd;
 	debug("SendEvent call (%d,%d,%d,%d)", fd, type, code, value);
 	struct uinput_event event;
 	int len;
 
-	if (fd <= fileno(stderr)) return;
+	if (fd <= fileno(stderr)) return -1;
 
 	memset(&event, 0, sizeof(event));
 	event.type = type;
@@ -239,25 +232,22 @@ jint Java_net_onthewings_touchservice_AndroidEvents_ScanFiles( JNIEnv* env,jobje
 }
 
 jstring Java_net_onthewings_touchservice_AndroidEvents_getDevPath( JNIEnv* env,jobject thiz, jint index) {
-	return (*env)->NewStringUTF(env, pDevs[index].device_path);
+	return env->NewStringUTF(ioDevices[index].device_path.c_str());
 }
 
 jstring Java_net_onthewings_touchservice_AndroidEvents_getDevName( JNIEnv* env,jobject thiz, jint index) {
-	if (pDevs[index].device_name == NULL) return NULL;
-	else return (*env)->NewStringUTF(env, pDevs[index].device_name);
+	std::string dName = ioDevices[index].device_name;
+	if (dName == "") return NULL;
+	else return env->NewStringUTF(ioDevices[index].device_name.c_str());
 }
 
 jint Java_net_onthewings_touchservice_AndroidEvents_OpenDev( JNIEnv* env,jobject thiz, jint index ) {
 	return open_device(index);
 }
 
-jint Java_net_onthewings_touchservice_AndroidEvents_RemoveDev( JNIEnv* env,jobject thiz, jint index ) {
-	return remove_device(index);
-}
-
 jint Java_net_onthewings_touchservice_AndroidEvents_PollDev( JNIEnv* env,jobject thiz, jint index ) {
-	if (index >= ioDevices.size() || pDevs[index].ufds.fd == -1) return -1;
-	int pollres = poll(ufds, ioDevices.size(), -1);
+	if (index >= ioDevices.size() || ioDevices[index].ufds.fd == -1) return -1;
+	int pollres = poll(&ufds[0], ioDevices.size(), -1);
 	if(ufds[index].revents) {
 		if(ufds[index].revents & POLLIN) {
 			int res = read(ufds[index].fd, &event, sizeof(event));

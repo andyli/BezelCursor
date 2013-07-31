@@ -4,7 +4,6 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
-import android.util.Log
 import android.view.DragEvent
 import android.view.MotionEvent
 import android.view.View
@@ -12,6 +11,7 @@ import android.view.WindowManager
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
 import java.util.LinkedList
+import net.onthewings.touchservice.Utils._
 
 class OverlayView(service:TouchService) extends View(service) {
 	val current_bound = new Rect()
@@ -43,12 +43,12 @@ class OverlayView(service:TouchService) extends View(service) {
     }
 	
 	override def onTouchEvent(evt:MotionEvent):Boolean = {
-		Log.d("Testtesttest", "onTouchEvent " + evt.getX() + "," + evt.getY() + "," + evt.getAction())
+		log("onTouchEvent " + evt.getX() + "," + evt.getY() + "," + evt.getAction())
 		return false
 	}
 	
 	override def onDragEvent(evt:DragEvent):Boolean = {
-		Log.d("Testtesttest", "onDragEvent")
+		log("onDragEvent")
 		return true
 	}
 }

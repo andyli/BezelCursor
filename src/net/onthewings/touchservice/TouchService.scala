@@ -3,7 +3,6 @@ package net.onthewings.touchservice;
 import android.accessibilityservice.AccessibilityService
 import android.graphics.PixelFormat
 import android.graphics.Rect
-import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
@@ -15,12 +14,9 @@ import scala.collection.JavaConversions._
 import java.util.List
 import java.util.LinkedList
 import java.util.ArrayList
+import net.onthewings.touchservice.Utils._
 
 class TouchService extends AccessibilityService {
-  
-	def log(msg:String) = {
-		Log.d("Testtesttest", msg)
-	}
 	
 	final def getBounds(src:AccessibilityNodeInfo, results:List[Rect]):Unit = {
     	val bound = new Rect()
@@ -103,7 +99,7 @@ class TouchService extends AccessibilityService {
     override def onCreate() = {
         super.onCreate()
         
-        Log.d("Testtesttest", "onCreate")
+        log("onCreate")
 
         
         mView = new OverlayView(this);
@@ -125,7 +121,7 @@ class TouchService extends AccessibilityService {
         val wm = getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager]
         
         wm.addView(mView, params)
-        Log.d("Testtesttest", "addView")
+        log("addView")
         
 //        events.intEnableDebug(1);
 //        int eInit = events.Init();
@@ -146,6 +142,7 @@ class TouchService extends AccessibilityService {
     override def onDestroy() = {
     	val wm = getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager]
         wm.removeView(mView)
+        
         
 //        for (InputDevice idev:events.m_Devs) {
 //	    	String path = idev.getPath();

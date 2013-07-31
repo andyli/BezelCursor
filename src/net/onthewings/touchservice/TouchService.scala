@@ -22,30 +22,6 @@ class TouchService extends AccessibilityService {
 		Log.d("Testtesttest", msg)
 	}
 	
-//	@scala.annotation.tailrec
-//	final def getBounds(srcList:ListBuffer[AccessibilityNodeInfo], results:ListBuffer[Rect]):Unit = {
-//    	val bound = new Rect()
-//    	
-//    	val children = new ListBuffer[AccessibilityNodeInfo]();
-//    	for (src <- srcList) {
-//	    	src.getBoundsInScreen(bound)
-//	    	//results += new Rect(bound)
-//	    	
-//	    	for (c <- 0 to src.getChildCount()) {
-//	    		val child = src.getChild(c)
-//	    		if (child == null) {
-//	    			//log("get child is null!!!")
-//	    		} else {
-//	    			children += src.getChild(c)
-//	    		}
-//	    	}
-//	    	src.recycle()
-//    	}
-//    	srcList.clear()
-//    	
-//    	getBounds(children, results);
-//    }
-	
 	final def getBounds(src:AccessibilityNodeInfo, results:List[Rect]):Unit = {
     	val bound = new Rect()
     	
@@ -125,9 +101,9 @@ class TouchService extends AccessibilityService {
     }
     
     override def onCreate() = {
-        super.onCreate();
+        super.onCreate()
         
-        Log.d("Testtesttest", "onCreate"); 
+        Log.d("Testtesttest", "onCreate")
 
         
         mView = new OverlayView(this);
@@ -144,8 +120,8 @@ class TouchService extends AccessibilityService {
 			|WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
 			,
 			PixelFormat.RGBA_8888
-        );
-        params.gravity = Gravity.FILL;
+        )
+        params.gravity = Gravity.FILL
         val wm = getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager]
         
         wm.addView(mView, params)
@@ -169,7 +145,7 @@ class TouchService extends AccessibilityService {
     
     override def onDestroy() = {
     	val wm = getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager]
-        wm.removeView(mView);
+        wm.removeView(mView)
         
 //        for (InputDevice idev:events.m_Devs) {
 //	    	String path = idev.getPath();

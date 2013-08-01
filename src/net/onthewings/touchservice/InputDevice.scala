@@ -54,8 +54,8 @@ object InputDevice {
      */
     def getTouchDevicePath():String = {
     	if (Shell.isSuAvailable()) {
-    		val getEvent_lp = Shell.getProcessOutput("getevent -lp").split("\n")
-    		val touchEventLine = getEvent_lp.indexWhere(line => line.indexOf("ABS_MT_POSITION_X") > -1)
+    		val getEvent_lp = Shell.getProcessOutput("getevent -p").split("\n")
+    		val touchEventLine = getEvent_lp.indexWhere(line => line.indexOf("0035"/*"ABS_MT_POSITION_X"*/) > -1)
     		val deviceLine = getEvent_lp.lastIndexWhere(line => line.indexOf("device") > -1, touchEventLine)
     		return getEvent_lp(deviceLine).substring(getEvent_lp(deviceLine).indexOf(":")+1).trim()
     	}
@@ -69,10 +69,15 @@ class AbsInputEvent(id:Int, name:String, value:Int, min:Int, max:Int, fuzz:Int, 
 }
 
 class InputDevice(path:String) {
-	private val getevent_lp = Shell.getProcessOutput("getevent -lp " + path).split("\n")
-	private val getevent_p = Shell.getProcessOutput("getevent -p " + path).split("\n")
+	private val getevent_p = if (Shell.isSuAvailable())
+		Shell.getProcessOutput("getevent -p " + path).split("\n")
+	else
+		null
 	private val name_re = """\s*name:\s*"(.*)"\s*""".r
-	val name_re(name) = getevent_lp(1)
+	val name_re(name) = getevent_p(1)
+	
+	/*
+	private val getevent_lp = Shell.getProcessOutput("getevent -lp " + path).split("\n")
 	
 	private val events_lp = getevent_lp.slice(
 		getevent_lp.indexWhere(line => line.indexOf("events:") > -1) + 1,
@@ -85,7 +90,7 @@ class InputDevice(path:String) {
 	
 	val absEvents = new HashMap[String,AbsInputEvent]()
 	private val eventType_re = """\s*([A-Z]{3}) \(([0-9]{4})\): """.r
-	private val eventDetail_re = """\s*([^\s]+)\s*: value (-?[0-9]+), min (-?[0-9]+), max (-?[0-9]+), fuzz (-?[0-9]+), flat (-?[0-9]+), resolution (-?[0-9]+)\s*""".r
+	private val eventDetail_re = """\s*([^\s]+)\s*:? value (-?[0-9]+), min (-?[0-9]+), max (-?[0-9]+), fuzz (-?[0-9]+), flat (-?[0-9]+), resolution (-?[0-9]+)\s*""".r
 	private var _type:Int = -1
 	for ((line_lp, line_p) <- events_lp.zip(events_p)) {
 		eventType_re.findFirstIn(line_lp) match {
@@ -110,4 +115,23 @@ class InputDevice(path:String) {
 		}
 	}
 	//log("eventTypes(3).keySet" + absEvents.keySet)
+	 */
+	def sendEvent(eventType:Int, event:Int, value:Int):Unit = {
+		Shell.runCommand("sendevent " + path + " " + eventType + " " + event + " " + value)
+	}
+	
+	def sendTapEvents(x:Int, y:Int):Unit = {
+		val EV_ABS = 0x0003
+		val EV_SYN = 0x0000
+		val ABS_MT_POSITION_X = 0x0035
+		val ABS_MT_POSITION_Y = 0x0036
+		val ABS_MT_TRACKING_ID = 0x0039
+		val SYN_REPORT = 0x0000
+		sendEvent(EV_ABS, ABS_MT_TRACKING_ID, 0x00000001)
+		sendEvent(EV_ABS, ABS_MT_POSITION_X, x)
+		sendEvent(EV_ABS, ABS_MT_POSITION_Y, y)
+		sendEvent(EV_SYN, SYN_REPORT, 0)
+		sendEvent(EV_ABS, ABS_MT_TRACKING_ID, 0xffffffff)
+		sendEvent(EV_SYN, SYN_REPORT, 0)
+	}
 }

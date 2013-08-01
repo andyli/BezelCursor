@@ -1,0 +1,113 @@
+package net.onthewings.touchservice
+
+//import scala.collection.JavaConversions._
+import net.onthewings.touchservice.Utils._
+import scala.collection.mutable.HashMap
+
+object InputDevice {
+	System.loadLibrary("TouchService")
+	
+	@native def getDebugEnabled():Boolean
+	@native def setDebugEnabled(enable:Boolean):Boolean
+
+	@native def ScanFiles():Int // return number of devs
+	@native def OpenDev(devid:Int):Int
+	@native def RemoveDev(devid:Int):Int
+	@native def getDevPath(devid:Int):String
+	@native def getDevName(devid:Int):String
+	@native def PollDev(devid:Int):Int
+	@native def getType():Int
+	@native def getCode():Int
+	@native def getValue():Int
+	// injector:
+	@native def intSendEvent(devid:Int, _type:Int, code:Int, value:Int):Int
+	
+	
+	/**
+	 * function Open : opens an input event node
+	 * @param forceOpen will try to set permissions and then reopen if first open attempt fails
+	 * @return true if input event node has been opened
+	 */
+	def Open(id:Int, forceOpen:Boolean = true):Boolean = {
+		val path = getDevPath(id)
+		var res = OpenDev(id);
+   		// if opening fails, we might not have the correct permissions, try changing 660 to 666
+   		if (res != 0) {
+   			// possible only if we have root
+   			if(forceOpen && Shell.isSuAvailable()) { 
+   				// set new permissions
+   				Shell.runCommand("chmod 666 "+ path);
+   				// reopen
+   			    res = OpenDev(id);
+   			}
+   		}
+   		val name = getDevName(id);
+   		val opened = (res == 0);
+   		// debug
+   		log("Open:"+path+" Name:"+name+" Result:"+opened);
+   		// done, return
+   		return opened;
+   	}
+    
+    /*
+     * Get the input device path (eg. /dev/input/event2) that gives touch events
+     */
+    def getTouchDevicePath():String = {
+    	if (Shell.isSuAvailable()) {
+    		val getEvent_lp = Shell.getProcessOutput("getevent -lp").split("\n")
+    		val touchEventLine = getEvent_lp.indexWhere(line => line.indexOf("ABS_MT_POSITION_X") > -1)
+    		val deviceLine = getEvent_lp.lastIndexWhere(line => line.indexOf("device") > -1, touchEventLine)
+    		return getEvent_lp(deviceLine).substring(getEvent_lp(deviceLine).indexOf(":")+1).trim()
+    	}
+    	
+    	return null
+    }
+}
+
+class AbsInputEvent(id:Int, name:String, value:Int, min:Int, max:Int, fuzz:Int, flat:Int, resolution:Int) {
+	
+}
+
+class InputDevice(path:String) {
+	private val getevent_lp = Shell.getProcessOutput("getevent -lp " + path).split("\n")
+	private val getevent_p = Shell.getProcessOutput("getevent -p " + path).split("\n")
+	private val name_re = """\s*name:\s*"(.*)"\s*""".r
+	val name_re(name) = getevent_lp(1)
+	
+	private val events_lp = getevent_lp.slice(
+		getevent_lp.indexWhere(line => line.indexOf("events:") > -1) + 1,
+		getevent_lp.indexWhere(line => line.indexOf("input props:") > -1)
+	)
+	private val events_p = getevent_p.slice(
+		getevent_p.indexWhere(line => line.indexOf("events:") > -1) + 1,
+		getevent_p.indexWhere(line => line.indexOf("input props:") > -1)
+	)
+	
+	val absEvents = new HashMap[String,AbsInputEvent]()
+	private val eventType_re = """\s*([A-Z]{3}) \(([0-9]{4})\): """.r
+	private val eventDetail_re = """\s*([^\s]+)\s*: value (-?[0-9]+), min (-?[0-9]+), max (-?[0-9]+), fuzz (-?[0-9]+), flat (-?[0-9]+), resolution (-?[0-9]+)\s*""".r
+	private var _type:Int = -1
+	for ((line_lp, line_p) <- events_lp.zip(events_p)) {
+		eventType_re.findFirstIn(line_lp) match {
+			case Some(eventType_re(t, n)) =>
+				_type = n.toInt				
+				_type match {
+					case 3 =>
+						val eventDetail_re(name, value, min, max, fuzz, flat, resolution) = eventType_re.replaceFirstIn(line_lp, "")
+						val eventDetail_re(id, _, _, _, _, _, _) = eventType_re.replaceFirstIn(line_p, "")
+						absEvents(name) = new AbsInputEvent(Integer.parseInt(id, 16), name, value.toInt, min.toInt, max.toInt, fuzz.toInt, flat.toInt, resolution.toInt)
+					case _ =>
+				}
+				
+			case None =>
+				_type match {
+					case 3 =>
+						val eventDetail_re(name, value, min, max, fuzz, flat, resolution) = line_lp
+						val eventDetail_re(id, _, _, _, _, _, _) = line_p
+						absEvents(name) = new AbsInputEvent(Integer.parseInt(id, 16), name, value.toInt, min.toInt, max.toInt, fuzz.toInt, flat.toInt, resolution.toInt)
+					case _ =>
+				}
+		}
+	}
+	//log("eventTypes(3).keySet" + absEvents.keySet)
+}

@@ -95,8 +95,13 @@ class TouchService extends AccessibilityService {
 //	    	log("dev: " + idev.getId() + " " + idev.getName() + " sent!!!");
 //    	}
     	
-    	//AndroidEvents.setDebugEnabled(true)
-    	//log("ScanFiles " + AndroidEvents.ScanFiles())
+    	//InputDevices.setDebugEnabled(true)
+    	//log("ScanFiles " + InputDevices.ScanFiles())
+    	//log("ScanFiles " + AndroidEvents.OpenDev(0))
+    	//Shell.setShell("sh")
+    	log(InputDevice.getTouchDevicePath())
+    	val inDev = new InputDevice(InputDevice.getTouchDevicePath())
+    	log(inDev.name)
     }
     
     override def onCreate() = {

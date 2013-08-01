@@ -216,7 +216,7 @@ jint Java_net_onthewings_touchservice_AndroidEvents_intSendEvent(JNIEnv* env,job
 
 
 
-jint Java_net_onthewings_touchservice_AndroidEvents_ScanFiles( JNIEnv* env,jobject thiz ) {
+jint ScanFiles(JNIEnv* env, jobject thiz) {
 	int res = scan_dir(device_path);
 	if(res != 0) {
 		debug("scan dir failed for %s:", device_path);
@@ -236,7 +236,7 @@ jstring Java_net_onthewings_touchservice_AndroidEvents_getDevName( JNIEnv* env,j
 	else return env->NewStringUTF(ioDevices[index].device_name.c_str());
 }
 
-jint Java_net_onthewings_touchservice_AndroidEvents_OpenDev( JNIEnv* env,jobject thiz, jint index ) {
+jint OpenDev(JNIEnv* env, jobject thiz, jint index) {
 	return open_device(index);
 }
 
@@ -270,10 +270,12 @@ jint Java_net_pocketmagic_android_eventinjector_Events_getValue( JNIEnv* env,job
 /*
  * Table of methods associated with the DrmRawContent class.
  */
-static JNINativeMethod AndroidEventsMethods[] = {
+static JNINativeMethod InputDeviceMethods[] = {
 	/* name, signature, funcPtr */
 	{"getDebugEnabled", "()Z", (void*)getDebugEnabled},
 	{"setDebugEnabled", "(Z)Z", (void*)setDebugEnabled},
+	{"ScanFiles", "()I", (void*)ScanFiles},
+	{"OpenDev", "(I)I", (void*)OpenDev},
 };
 
 int jniRegisterNativeMethods(JNIEnv* env, const char* className,
@@ -301,9 +303,9 @@ static int registerNatives(JNIEnv* env)
 {
 	if (jniRegisterNativeMethods(
 		env,
-		"net/onthewings/touchservice/AndroidEvents$",
-		AndroidEventsMethods,
-		sizeof(AndroidEventsMethods) / sizeof(AndroidEventsMethods[0])
+		"net/onthewings/touchservice/InputDevice$",
+		InputDeviceMethods,
+		sizeof(InputDeviceMethods) / sizeof(InputDeviceMethods[0])
 	) != 0){
 		debug("registerNatives failed");
 		return JNI_FALSE;

@@ -94,6 +94,9 @@ class TouchService extends AccessibilityService {
 //	    	*/
 //	    	log("dev: " + idev.getId() + " " + idev.getName() + " sent!!!");
 //    	}
+    	
+    	//AndroidEvents.setDebugEnabled(true)
+    	//log("ScanFiles " + AndroidEvents.ScanFiles())
     }
     
     override def onCreate() = {

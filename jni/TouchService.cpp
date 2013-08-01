@@ -55,11 +55,11 @@ struct label {
 
 
 
-/* Debug tools
+/*
+ * Debug tools
  */
- int g_debug = 0;
- 
-   
+bool g_debug = false;
+
 void debug(const char *szFormat, ...)
 {
 	if (g_debug == 0) return;
@@ -84,20 +84,13 @@ void debug(const char *szFormat, ...)
 
 
 
-jint Java_net_onthewings_touchservice_AndroidEvents_intEnableDebug(JNIEnv* env, jobject thiz, jint enable) {
-	g_debug = enable;
+JNIEXPORT jboolean JNICALL getDebugEnabled(JNIEnv* env, jobject thiz) {
 	return g_debug;
 }
- 
-jint JNI_OnLoad(JavaVM *vm, void *reserved)
-{
-	debug("TouchService native lib loaded.");
-	return JNI_VERSION_1_2; //1_2 1_4
-}
 
-void JNI_OnUnload(JavaVM *vm, void *reserved)
-{
-	debug("TouchService native lib unloaded.");
+JNIEXPORT jboolean JNICALL setDebugEnabled(JNIEnv* env, jobject thiz, jboolean enable) {
+	g_debug = enable;
+	return g_debug;
 }
 
 std::vector<struct pollfd> ufds;
@@ -217,6 +210,8 @@ jint Java_net_onthewings_touchservice_AndroidEvents_intSendEvent(JNIEnv* env,job
 
 	len = write(fd, &event, sizeof(event));
 	debug("SendEvent done:%d",len);
+
+	return 0;
 } 
 
 
@@ -270,6 +265,73 @@ jint Java_net_pocketmagic_android_eventinjector_Events_getCode( JNIEnv* env,jobj
 
 jint Java_net_pocketmagic_android_eventinjector_Events_getValue( JNIEnv* env,jobject thiz ) {
 	return event.value;
+}
+
+/*
+ * Table of methods associated with the DrmRawContent class.
+ */
+static JNINativeMethod AndroidEventsMethods[] = {
+	/* name, signature, funcPtr */
+	{"getDebugEnabled", "()Z", (void*)getDebugEnabled},
+	{"setDebugEnabled", "(Z)Z", (void*)setDebugEnabled},
+};
+
+int jniRegisterNativeMethods(JNIEnv* env, const char* className,
+    const JNINativeMethod* gMethods, int numMethods)
+{
+    jclass clazz;
+
+    debug("Registering %s natives\n", className);
+    clazz = env->FindClass(className);
+    if (clazz == NULL) {
+    	debug("Native registration unable to find class '%s'\n", className);
+        return -1;
+    }
+    if (env->RegisterNatives(clazz, gMethods, numMethods) < 0) {
+    	debug("RegisterNatives failed for '%s'\n", className);
+        return -1;
+    }
+    return 0;
+}
+
+/*
+ * Register native methods for all classes we know about.
+ */
+static int registerNatives(JNIEnv* env)
+{
+	if (jniRegisterNativeMethods(
+		env,
+		"net/onthewings/touchservice/AndroidEvents$",
+		AndroidEventsMethods,
+		sizeof(AndroidEventsMethods) / sizeof(AndroidEventsMethods[0])
+	) != 0){
+		debug("registerNatives failed");
+		return JNI_FALSE;
+	}
+
+	debug("registerNatives ok");
+	return JNI_TRUE;
+}
+
+jint JNI_OnLoad(JavaVM *vm, void *reserved)
+{
+	debug("TouchService native lib loaded.");
+
+	JNIEnv* env = NULL;
+	jint result = -1;
+
+	if (vm->GetEnv((void **)&env, JNI_VERSION_1_2) != JNI_OK)
+		return JNI_ERR;
+
+	if (!registerNatives(env))
+		return JNI_ERR;
+
+	return JNI_VERSION_1_2; //1_2 1_4
+}
+
+void JNI_OnUnload(JavaVM *vm, void *reserved)
+{
+	debug("TouchService native lib unloaded.");
 }
 
 #ifdef __cplusplus

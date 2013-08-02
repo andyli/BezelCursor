@@ -1,7 +1,7 @@
 package net.onthewings.touchservice
 
 //import scala.collection.JavaConversions._
-import net.onthewings.touchservice.Utils._
+import Utils._
 import scala.collection.mutable.HashMap
 
 object InputDevice {

@@ -14,7 +14,7 @@ import scala.collection.JavaConversions._
 import java.util.List
 import java.util.LinkedList
 import java.util.ArrayList
-import net.onthewings.touchservice.Utils._
+import Utils._
 
 class TouchService extends AccessibilityService {
 	
@@ -40,6 +40,8 @@ class TouchService extends AccessibilityService {
     }
 
     var mView:OverlayView = null
+    var hotspotView_l:HotspotView = null
+    var hotspotView_r:HotspotView = null
     //private Events events = new Events();
 
     override def onAccessibilityEvent(event:AccessibilityEvent) = {
@@ -67,41 +69,10 @@ class TouchService extends AccessibilityService {
     	
     }
     
+    val touchDevice = new InputDevice(InputDevice.getTouchDevicePath())
 
     override def onServiceConnected() = {
     	log("onServiceConnected")
-    	
-//    	for (InputDevice idev:events.m_Devs) {
-//	    	String path = idev.getPath();
-//	    	if (path.charAt(path.length() - 1) != '2')
-//	    		continue;
-//	    	
-//	    	log("dev: " + idev.getId() + " " + idev.getName());
-//	    	/*
-//	    	Events.intSendEvent(idev.m_nId, 0003, 0x0039, 0x00000058);
-//	    	Events.intSendEvent(idev.m_nId, 0003, 0x0035, 0x00000254);
-//	    	Events.intSendEvent(idev.m_nId, 0003, 0x0036, 0x0000020b);
-//	    	Events.intSendEvent(idev.m_nId, 0003, 0x003a, 0x0000004f);
-//	    	Events.intSendEvent(idev.m_nId, 0003, 0x0031, 0x00000004);
-//	    	Events.intSendEvent(idev.m_nId, 0000, 0x0000, 0x00000000);
-//	    	Events.intSendEvent(idev.m_nId, 0003, 0x0035, 0x00000252);
-//	    	Events.intSendEvent(idev.m_nId, 0003, 0x003a, 0x00000050);
-//	    	Events.intSendEvent(idev.m_nId, 0003, 0x0030, 0x00000005);
-//	    	Events.intSendEvent(idev.m_nId, 0003, 0x0034, 0x00000001);
-//	    	Events.intSendEvent(idev.m_nId, 0000, 0x0000, 0x00000000);
-//	    	Events.intSendEvent(idev.m_nId, 0003, 0x0039, 0xffffffff);
-//	    	Events.intSendEvent(idev.m_nId, 0000, 0x0000, 0x00000000);
-//	    	*/
-//	    	log("dev: " + idev.getId() + " " + idev.getName() + " sent!!!");
-//    	}
-    	
-    	//InputDevices.setDebugEnabled(true)
-    	//log("ScanFiles " + InputDevices.ScanFiles())
-    	//log("ScanFiles " + AndroidEvents.OpenDev(0))
-    	//Shell.setShell("sh")
-    	log(InputDevice.getTouchDevicePath())
-    	val inDev = new InputDevice(InputDevice.getTouchDevicePath())
-    	log(inDev.name)
     }
     
     override def onCreate() = {
@@ -109,6 +80,7 @@ class TouchService extends AccessibilityService {
         
         log("onCreate")
 
+        val wm = getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager]
         
         mView = new OverlayView(this);
         
@@ -126,40 +98,47 @@ class TouchService extends AccessibilityService {
 			PixelFormat.RGBA_8888
         )
         params.gravity = Gravity.FILL
-        val wm = getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager]
         
         wm.addView(mView, params)
-        log("addView")
         
-//        events.intEnableDebug(1);
-//        int eInit = events.Init();
-//        log("event.Init() " + eInit);
-//        
-//
-//    	
-//    	for (InputDevice idev:events.m_Devs) {
-//	    	String path = idev.getPath();
-//	    	if (path.charAt(path.length() - 1) != '2')
-//	    		continue;
-//	    	
-//	    	idev.Open(true);
-//	    	log("dev: " + idev.getId() + " " + idev.getName() + " " + idev.getOpen());
-//    	}
+        
+        
+        val params_hotspot_l = new WindowManager.LayoutParams(
+			10,
+			ViewGroup.LayoutParams.WRAP_CONTENT,
+			WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
+			
+			WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+			|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+			,
+			PixelFormat.RGBA_8888
+        )
+        params_hotspot_l.gravity = Gravity.LEFT
+        
+        hotspotView_l = new HotspotView(this)
+        wm.addView(hotspotView_l, params_hotspot_l)
+        
+        val params_hotspot_r = new WindowManager.LayoutParams(
+			10,
+			ViewGroup.LayoutParams.WRAP_CONTENT,
+			WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
+			
+			WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+			|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+			,
+			PixelFormat.RGBA_8888
+        )
+        params_hotspot_r.gravity = Gravity.RIGHT
+        
+        hotspotView_r = new HotspotView(this)
+        wm.addView(hotspotView_r, params_hotspot_r)
+        
+        
+        log("addView")
     }
     
     override def onDestroy() = {
     	val wm = getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager]
         wm.removeView(mView)
-        
-        
-//        for (InputDevice idev:events.m_Devs) {
-//	    	String path = idev.getPath();
-//	    	if (path.charAt(path.length() - 1) != '2')
-//	    		continue;
-//	    	
-//	    	idev.Close();
-//    	}
-//        
-//        events.Release();
     }
 }

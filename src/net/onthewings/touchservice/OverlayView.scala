@@ -11,13 +11,16 @@ import android.view.WindowManager
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
 import java.util.LinkedList
-import net.onthewings.touchservice.Utils._
+import Utils._
+import android.graphics.PointF
 
 class OverlayView(service:TouchService) extends View(service) {
+
 	val current_bound = new Rect()
 	val bounds = new LinkedList[Rect]()
 	val current_paint = new Paint()
 	val paint = new Paint()
+	val cursor_paint = new Paint()
 
 	paint.setColor(Color.WHITE)
 	paint.setStrokeWidth(2)
@@ -29,6 +32,12 @@ class OverlayView(service:TouchService) extends View(service) {
 	//current_paint.setAlpha(100)
 	//current_paint.setStyle(Paint.Style.FILL)
 
+	cursor_paint.setColor(Color.GREEN)
+	cursor_paint.setStrokeWidth(2)
+	cursor_paint.setStyle(Paint.Style.STROKE)
+	
+	var cursor_position:PointF = null
+
 	def getService():TouchService = {
 		return getContext().asInstanceOf[TouchService]
 	}
@@ -36,10 +45,15 @@ class OverlayView(service:TouchService) extends View(service) {
     override def onDraw(canvas:Canvas) = {
         //canvas.drawLine(0, 0, getWidth(), getHeight(), paint);
         
-        for (bound <- bounds) {
-        	canvas.drawRect(bound, paint)
+//        for (bound <- bounds) {
+//        	canvas.drawRect(bound, paint)
+//        }
+//        canvas.drawRect(current_bound, current_paint)
+        
+        if (cursor_position != null) {
+        	canvas.drawCircle(cursor_position.x, cursor_position.y, 2, cursor_paint)
+        	canvas.drawCircle(cursor_position.x, cursor_position.y, 25, cursor_paint)
         }
-        canvas.drawRect(current_bound, current_paint)
     }
 	
 	override def onTouchEvent(evt:MotionEvent):Boolean = {

@@ -95,8 +95,6 @@ JNIEXPORT jboolean JNICALL setDebugEnabled(JNIEnv* env, jobject thiz, jboolean e
 
 std::vector<struct pollfd> ufds;
 
-const char *device_path = "/dev/input";
-
 int g_Polling = 0;
 struct input_event event;
 int c;
@@ -105,103 +103,48 @@ int pollres;
 int get_time = 0;
 const char *newline = "\n";
 uint16_t get_switch = 0;
-int version;
 
 int dont_block = -1;
 int event_count = 0;
 int sync_rate = 0;
 int64_t last_sync_time = 0;
-const char *device = NULL; 
+const char *device = NULL;
 
+IoDevice* getIoDevice(std::string devicePath, bool createIfNeeded) {
+	for (int i = 0; i < ioDevices.size(); ++i) {
+		if (ioDevices[i].device_path == devicePath){
+			debug("getIoDevice found");
+			return &ioDevices[i];
+		}
+	}
 
-static int open_device(int index)
-{
-	if (index >= ioDevices.size()) return -1;
-
-	debug("open_device prep to open");
-	std::string device = ioDevices[index].device_path;
-	
-	debug("open_device call %s", device.c_str());
-    int version;
-    int fd;
-    
-    char name[80];
-    char location[80];
-    char idstr[80];
-    struct input_id id;
-	
-    fd = open(device.c_str(), O_RDWR);
-    if(fd < 0) {
-    	ioDevices[index].ufds.fd = -1;
-		
-    	ioDevices[index].device_name = "";
-		debug("could not open %s, %s", device.c_str(), strerror(errno));
-        return -1;
-    }
-    
-    ioDevices[index].ufds.fd = fd;
-	ufds[index].fd = fd;
-	
-    name[sizeof(name) - 1] = '\0';
-    if(ioctl(fd, EVIOCGNAME(sizeof(name) - 1), &name) < 1) {
-        debug("could not get device name for %s, %s", device.c_str(), strerror(errno));
-        name[0] = '\0';
-    }
-	debug("Device %d: %s: %s", ioDevices.size(), device.c_str(), name);
-	
-	ioDevices[index].device_name = strdup(name);
-    
-    
-    return 0;
+	IoDevice* dev = NULL;
+	if (createIfNeeded) {
+		debug("getIoDevice not found");
+		ioDevices.resize(ioDevices.size()+1);
+		dev = &ioDevices[ioDevices.size()-1];
+		dev->device_path = devicePath;
+	}
+	return dev;
 }
 
+jint SendEvent(JNIEnv* env, jobject thiz, jstring devicePath, uint16_t type, uint16_t code, int32_t value) {
+	const char *devicePathStr = env->GetStringUTFChars(devicePath, 0);
+	IoDevice* ioDevice = getIoDevice(devicePathStr, false);
+	env->ReleaseStringUTFChars(devicePath, devicePathStr);
 
-static int scan_dir(const char *dirname)
-{
-	ioDevices.clear();
-    char devname[PATH_MAX];
-    char *filename;
-    DIR *dir;
-    struct dirent *de;
-    dir = opendir(dirname);
-    if(dir == NULL)
-        return -1;
-    strcpy(devname, dirname);
-    filename = devname + strlen(devname);
-    *filename++ = '/';
-    while((de = readdir(dir))) {
-        if (
-        	de->d_name[0] == '.' &&
-        	(de->d_name[1] == '\0' ||
-            (de->d_name[1] == '.' && de->d_name[2] == '\0'))
-        )
-            continue;
+	if (!ioDevice)
+		return -1;
 
-        strcpy(filename, de->d_name);
-		debug("scan_dir:prepare to open:%s", devname);
-		// add new filename to our structure: devname
-		pollfd ufd;
-		ufd.events = POLLIN;
-		ufds.push_back(ufd);
-		
-		IoDevice dev;
-		dev.ufds.events = POLLIN;
-		dev.device_path = strdup(devname);
-		ioDevices.push_back(dev);
+	int fd = ioDevice->ufds.fd;
 
-    }
-    closedir(dir);
-    return 0;
-} 
-
-jint Java_net_onthewings_touchservice_AndroidEvents_intSendEvent(JNIEnv* env,jobject thiz, jint index, uint16_t type, uint16_t code, int32_t value) {
-	if (index >= ioDevices.size() || ioDevices[index].ufds.fd == -1) return -1;
-	int fd = ioDevices[index].ufds.fd;
 	debug("SendEvent call (%d,%d,%d,%d)", fd, type, code, value);
+
+	if (fd <= fileno(stderr))
+		return -1;
+
 	struct uinput_event event;
 	int len;
-
-	if (fd <= fileno(stderr)) return -1;
 
 	memset(&event, 0, sizeof(event));
 	event.type = type;
@@ -211,33 +154,37 @@ jint Java_net_onthewings_touchservice_AndroidEvents_intSendEvent(JNIEnv* env,job
 	len = write(fd, &event, sizeof(event));
 	debug("SendEvent done:%d",len);
 
-	return 0;
-} 
-
-
-
-jint ScanFiles(JNIEnv* env, jobject thiz) {
-	int res = scan_dir(device_path);
-	if(res != 0) {
-		debug("scan dir failed for %s:", device_path);
+	if (len != sizeof(event))
 		return -1;
-	}
-	
-	return ioDevices.size();
+
+	return 0;
 }
 
-jstring Java_net_onthewings_touchservice_AndroidEvents_getDevPath( JNIEnv* env,jobject thiz, jint index) {
-	return env->NewStringUTF(ioDevices[index].device_path.c_str());
-}
+jint OpenDev(JNIEnv* env, jobject thiz, jstring devicePath) {
+	const char *devicePathStr = env->GetStringUTFChars(devicePath, 0);
 
-jstring Java_net_onthewings_touchservice_AndroidEvents_getDevName( JNIEnv* env,jobject thiz, jint index) {
-	std::string dName = ioDevices[index].device_name;
-	if (dName == "") return NULL;
-	else return env->NewStringUTF(ioDevices[index].device_name.c_str());
-}
+    int fd;
 
-jint OpenDev(JNIEnv* env, jobject thiz, jint index) {
-	return open_device(index);
+    fd = open(devicePathStr, O_RDWR);
+    if (fd < 0) {
+		debug("could not open %s, %s", devicePathStr, strerror(errno));
+		env->ReleaseStringUTFChars(devicePath, devicePathStr);
+        return -1;
+    }
+
+	debug("open_device %s %i", devicePathStr, fd);
+
+    IoDevice* ioDevice = getIoDevice(devicePathStr, true);
+    if (!ioDevice) {
+    	debug("getIoDevice failed");
+    	return -1;
+    }
+    ioDevice->ufds.events = POLLIN;
+    ioDevice->ufds.fd = fd;
+
+    env->ReleaseStringUTFChars(devicePath, devicePathStr);
+
+    return 0;
 }
 
 jint Java_net_onthewings_touchservice_AndroidEvents_PollDev( JNIEnv* env,jobject thiz, jint index ) {
@@ -268,14 +215,14 @@ jint Java_net_pocketmagic_android_eventinjector_Events_getValue( JNIEnv* env,job
 }
 
 /*
- * Table of methods associated with the DrmRawContent class.
+ * Table of methods associated with the class.
  */
 static JNINativeMethod InputDeviceMethods[] = {
 	/* name, signature, funcPtr */
 	{"getDebugEnabled", "()Z", (void*)getDebugEnabled},
 	{"setDebugEnabled", "(Z)Z", (void*)setDebugEnabled},
-	{"ScanFiles", "()I", (void*)ScanFiles},
-	{"OpenDev", "(I)I", (void*)OpenDev},
+	{"OpenDev", "(Ljava/lang/String;)I", (void*)OpenDev},
+	{"SendEvent", "(Ljava/lang/String;III)I", (void*)SendEvent},
 };
 
 int jniRegisterNativeMethods(JNIEnv* env, const char* className,

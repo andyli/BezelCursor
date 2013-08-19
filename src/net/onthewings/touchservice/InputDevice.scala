@@ -7,20 +7,19 @@ import scala.collection.mutable.HashMap
 object InputDevice {
 	System.loadLibrary("TouchService")
 	
-	@native def getDebugEnabled():Boolean
-	@native def setDebugEnabled(enable:Boolean):Boolean
-
-	@native def ScanFiles():Int // return number of devs
-	@native def OpenDev(devid:Int):Int
-	@native def RemoveDev(devid:Int):Int
-	@native def getDevPath(devid:Int):String
-	@native def getDevName(devid:Int):String
-	@native def PollDev(devid:Int):Int
-	@native def getType():Int
-	@native def getCode():Int
-	@native def getValue():Int
-	// injector:
-	@native def intSendEvent(devid:Int, _type:Int, code:Int, value:Int):Int
+	@native protected def getDebugEnabled():Boolean
+	@native protected def setDebugEnabled(enable:Boolean):Boolean
+	@native protected def OpenDev(devicePath:String):Int
+	@native protected def SendEvent(devicePath:String, _type:Int, code:Int, value:Int):Int
+	
+	
+//	@native def RemoveDev(devid:Int):Int
+//	@native def getDevPath(devid:Int):String
+//	@native def getDevName(devid:Int):String
+//	@native def PollDev(devid:Int):Int
+//	@native def getType():Int
+//	@native def getCode():Int
+//	@native def getValue():Int
 	
 	
 	/**
@@ -28,24 +27,20 @@ object InputDevice {
 	 * @param forceOpen will try to set permissions and then reopen if first open attempt fails
 	 * @return true if input event node has been opened
 	 */
-	def Open(id:Int, forceOpen:Boolean = true):Boolean = {
-		val path = getDevPath(id)
-		var res = OpenDev(id);
+	def Open(devicePath:String, forceOpen:Boolean = true):Boolean = {
+		var res = OpenDev(devicePath);
    		// if opening fails, we might not have the correct permissions, try changing 660 to 666
    		if (res != 0) {
    			// possible only if we have root
    			if(forceOpen && Shell.isSuAvailable()) { 
    				// set new permissions
-   				Shell.runCommand("chmod 666 "+ path);
+   				Shell.runCommand("chmod 666 "+ devicePath);
    				// reopen
-   			    res = OpenDev(id);
+   			    res = OpenDev(devicePath);
    			}
    		}
-   		val name = getDevName(id);
    		val opened = (res == 0);
-   		// debug
-   		log("Open:"+path+" Name:"+name+" Result:"+opened);
-   		// done, return
+   		log("Open:" + devicePath + " Result:" + opened);
    		return opened;
    	}
     
@@ -116,8 +111,14 @@ class InputDevice(path:String) {
 	}
 	//log("eventTypes(3).keySet" + absEvents.keySet)
 	 */
+	def open():Boolean = {
+		return InputDevice.Open(path)
+	}
+	
 	def sendEvent(eventType:Int, event:Int, value:Int):Unit = {
-		Shell.runCommand("sendevent " + path + " " + eventType + " " + event + " " + value)
+		val sendEventSuccess = InputDevice.SendEvent(path, eventType, event, value)
+		log("sendEventSuccess " + sendEventSuccess)
+		//Shell.runCommand("sendevent " + path + " " + eventType + " " + event + " " + value)
 	}
 	
 	def sendTapEvents(x:Int, y:Int):Unit = {
@@ -133,5 +134,6 @@ class InputDevice(path:String) {
 		sendEvent(EV_SYN, SYN_REPORT, 0)
 		sendEvent(EV_ABS, ABS_MT_TRACKING_ID, 0xffffffff)
 		sendEvent(EV_SYN, SYN_REPORT, 0)
+		sendEvent(EV_SYN, SYN_REPORT, 0xcccccccc)
 	}
 }

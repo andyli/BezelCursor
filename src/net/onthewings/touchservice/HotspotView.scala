@@ -33,7 +33,7 @@ class HotspotView(service:TouchService) extends View(service) {
     }
 	
 	override def onTouchEvent(evt:MotionEvent):Boolean = {
-		log("onTouchEvent " + evt.getRawX() + "," + evt.getRawY() + "," + evt.getAction())
+		//log("onTouchEvent " + evt.getRawX() + "," + evt.getRawY() + "," + evt.getAction())
 		
 		def get_cursor_position(x:Float, y:Float):PointF = {
 			val moveScale = 3

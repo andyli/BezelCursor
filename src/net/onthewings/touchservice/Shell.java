@@ -1,8 +1,5 @@
 package net.onthewings.touchservice;
 
-
-import android.util.Log;
-
 import java.io.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,7 +23,6 @@ import java.util.regex.Pattern;
  */
 
 public class Shell {
-  private static final String TAG = "Shell";
 
   private static String shell;
 

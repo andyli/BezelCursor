@@ -45,7 +45,7 @@ class TouchService extends AccessibilityService {
     //private Events events = new Events();
 
     override def onAccessibilityEvent(event:AccessibilityEvent) = {
-    	log("AccessibilityEvent " + AccessibilityEvent.eventTypeToString(event.getEventType()))
+    	//log("AccessibilityEvent " + AccessibilityEvent.eventTypeToString(event.getEventType()))
     	
     	val src = event.getSource()
     	if (src != null){
@@ -135,6 +135,9 @@ class TouchService extends AccessibilityService {
         
         
         log("addView")
+        
+        val touchDeviceOpenSuccess = touchDevice.open()
+        log("touchDeviceOpenSuccess " + touchDeviceOpenSuccess)
     }
     
     override def onDestroy() = {

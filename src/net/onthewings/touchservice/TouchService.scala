@@ -87,13 +87,13 @@ class TouchService extends AccessibilityService {
         val params = new WindowManager.LayoutParams(
 			ViewGroup.LayoutParams.WRAP_CONTENT,
 			ViewGroup.LayoutParams.WRAP_CONTENT,
-			WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
+			WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
 			
 			WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
 			|WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
 			|WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
 			|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-			|WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+			//|WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
 			,
 			PixelFormat.RGBA_8888
         )

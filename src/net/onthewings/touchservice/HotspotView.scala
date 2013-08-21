@@ -13,16 +13,29 @@ import scala.collection.JavaConversions._
 import java.util.LinkedList
 import Utils._
 import android.graphics.PointF
+import android.view.ViewGroup
+import android.graphics.PixelFormat
 
 class HotspotView(service:TouchService) extends View(service) {	
-	var width = 40
+	var width = 25
 	var height = 10
 	val paint = new Paint()
 	val down_position = new PointF()
 
 	paint.setStyle(Paint.Style.FILL)
 	paint.setColor(Color.WHITE)
-	paint.setAlpha(100)
+	paint.setAlpha(10)
+	
+	setLayoutParams(new WindowManager.LayoutParams(
+		width,
+		ViewGroup.LayoutParams.WRAP_CONTENT,
+		WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
+		
+		WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+		|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+		,
+		PixelFormat.RGBA_8888
+	))
 
 	def getService():TouchService = {
 		return getContext().asInstanceOf[TouchService]
@@ -44,20 +57,17 @@ class HotspotView(service:TouchService) extends View(service) {
 			case 0 => //down
 				service.mView.cursor_position = new PointF(evt.getRawX(), evt.getRawY())
 				down_position.set(evt.getRawX(), evt.getRawY())
+				setVisibility(View.INVISIBLE)
 			case 1 => //up
 				service.mView.cursor_position.set(get_cursor_position(evt.getRawX(), evt.getRawY()))
 				service.touchDevice.sendTapEvents(service.mView.cursor_position.x.toInt, service.mView.cursor_position.y.toInt)
 				service.mView.cursor_position = null
+				setVisibility(View.VISIBLE)
 			case 2 => //move				
 				service.mView.cursor_position.set(get_cursor_position(evt.getRawX(), evt.getRawY()))
 			case _ =>
 		}
 		service.mView.invalidate()
 		return false
-	}
-	
-	override def onDragEvent(evt:DragEvent):Boolean = {
-		log("onDragEvent")
-		return true
 	}
 }

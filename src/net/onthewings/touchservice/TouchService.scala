@@ -83,7 +83,6 @@ class TouchService extends AccessibilityService {
         val wm = getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager]
         
         mView = new OverlayView(this);
-        
         val params = new WindowManager.LayoutParams(
 			ViewGroup.LayoutParams.WRAP_CONTENT,
 			ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -98,39 +97,18 @@ class TouchService extends AccessibilityService {
 			PixelFormat.RGBA_8888
         )
         params.gravity = Gravity.FILL
-        
         wm.addView(mView, params)
         
         
-        
-        val params_hotspot_l = new WindowManager.LayoutParams(
-			10,
-			ViewGroup.LayoutParams.WRAP_CONTENT,
-			WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
-			
-			WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-			|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-			,
-			PixelFormat.RGBA_8888
-        )
-        params_hotspot_l.gravity = Gravity.LEFT
-        
         hotspotView_l = new HotspotView(this)
+        val params_hotspot_l = hotspotView_l.getLayoutParams().asInstanceOf[WindowManager.LayoutParams]
+        params_hotspot_l.gravity = Gravity.LEFT
         wm.addView(hotspotView_l, params_hotspot_l)
         
-        val params_hotspot_r = new WindowManager.LayoutParams(
-			10,
-			ViewGroup.LayoutParams.WRAP_CONTENT,
-			WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
-			
-			WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-			|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-			,
-			PixelFormat.RGBA_8888
-        )
-        params_hotspot_r.gravity = Gravity.RIGHT
         
         hotspotView_r = new HotspotView(this)
+        val params_hotspot_r = hotspotView_r.getLayoutParams().asInstanceOf[WindowManager.LayoutParams]
+        params_hotspot_r.gravity = Gravity.RIGHT
         wm.addView(hotspotView_r, params_hotspot_r)
         
         

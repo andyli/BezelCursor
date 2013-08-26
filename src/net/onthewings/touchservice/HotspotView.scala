@@ -15,6 +15,8 @@ import Utils._
 import android.graphics.PointF
 import android.view.ViewGroup
 import android.graphics.PixelFormat
+import android.content.Context
+import android.graphics.Point
 
 class HotspotView(service:TouchService) extends View(service) {	
 	var width = 25
@@ -25,6 +27,11 @@ class HotspotView(service:TouchService) extends View(service) {
 	paint.setStyle(Paint.Style.FILL)
 	paint.setColor(Color.WHITE)
 	paint.setAlpha(10)
+	
+	private val wm = getContext().getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager]
+	private val display = wm.getDefaultDisplay()
+	private val displaySize = new Point(display.getWidth(), display.getHeight())
+	//display.getSize(displaySize)
 	
 	setLayoutParams(new WindowManager.LayoutParams(
 		width,
@@ -61,7 +68,7 @@ class HotspotView(service:TouchService) extends View(service) {
 				setVisibility(View.INVISIBLE)
 			case 1 => //up
 				service.mView.cursor_position.set(get_cursor_position(evt.getRawX(), evt.getRawY()))
-				service.touchDevice.sendTapEvents(service.mView.cursor_position.x.toInt, service.mView.cursor_position.y.toInt)
+				service.touchDevice.sendTapEvents(service.mView.cursor_position.x / displaySize.x, service.mView.cursor_position.y / displaySize.y)
 				service.mView.cursor_position = null
 				setVisibility(View.VISIBLE)
 			case 2 => //move				

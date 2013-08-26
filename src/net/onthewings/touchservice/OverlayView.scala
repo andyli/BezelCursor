@@ -48,15 +48,13 @@ class OverlayView(service:TouchService) extends View(service) {
 		return getContext().asInstanceOf[TouchService]
 	}
 	
-    override def onDraw(canvas:Canvas) = {
-        //canvas.drawLine(0, 0, getWidth(), getHeight(), paint);
-        
-//        for (bound <- bounds) {
-//        	canvas.drawRect(bound, paint)
-//        }
-//        canvas.drawRect(current_bound, current_paint)
-        
+    override def onDraw(canvas:Canvas) = {                
         if (cursor_position != null) {
+	        for (bound <- bounds) {
+	        	canvas.drawRect(bound, paint)
+	        }
+	        canvas.drawRect(current_bound, current_paint)
+	        
         	canvas.drawLine(touch_position.x, touch_position.y, cursor_position.x, cursor_position.y, line_paint)
         	canvas.drawCircle(cursor_position.x, cursor_position.y, 2, cursor_paint)
         	canvas.drawCircle(cursor_position.x, cursor_position.y, 25, cursor_paint)

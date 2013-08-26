@@ -2,7 +2,9 @@ package net.onthewings.touchservice
 
 //import scala.collection.JavaConversions._
 import Utils._
+import LinuxInput._
 import scala.collection.mutable.HashMap
+
 
 object InputDevice {
 	System.loadLibrary("TouchService")
@@ -44,15 +46,19 @@ object InputDevice {
    		return opened;
    	}
     
-    /*
-     * Get the input device path (eg. /dev/input/event2) that gives touch events
+    /**
+     * Get the input device path (eg. /dev/input/event2) that gives touch events.
      */
     def getTouchDevicePath():String = {
     	if (Shell.isSuAvailable()) {
     		val getEvent_lp = Shell.getProcessOutput("getevent -p").split("\n")
-    		val touchEventLine = getEvent_lp.indexWhere(line => line.indexOf("0035"/*"ABS_MT_POSITION_X"*/) > -1)
-    		val deviceLine = getEvent_lp.lastIndexWhere(line => line.indexOf("device") > -1, touchEventLine)
-    		return getEvent_lp(deviceLine).substring(getEvent_lp(deviceLine).indexOf(":")+1).trim()
+    		val touchEventLine = getEvent_lp.indexWhere(line => line.indexOf("%04x".format(ABS_MT_POSITION_X)) >= 0)
+    		if (touchEventLine < 0) {
+    			return null;
+    		}
+    		val deviceLine = getEvent_lp.lastIndexWhere(line => line.indexOf("device") >= 0, touchEventLine)
+    		val path = getEvent_lp(deviceLine).substring(getEvent_lp(deviceLine).indexOf(":")+1).trim()
+    		return path
     	}
     	
     	return null
@@ -69,7 +75,22 @@ class InputDevice(path:String) {
 	else
 		null
 	private val name_re = """\s*name:\s*"(.*)"\s*""".r
+	private val detail_re = """\s*([0-9a-f]+)\s+:?\s*value\s+([0-9]+),?\s+min\s+([0-9]+),?\s+max\s+([0-9]+),.+""".r
+	
 	val name_re(name) = getevent_p(1)
+	val isProtocolB = getevent_p.indexWhere(line => line.indexOf("%04x".format(ABS_MT_SLOT)) >= 0) >= 0
+	
+	log(if (isProtocolB) path + " is B" else path + " is A")
+	private val detail_re(_, _, x_min_str, x_max_str) = getevent_p(
+		getevent_p.indexWhere(line => line.indexOf("%04x".format(ABS_MT_POSITION_X)) >= 0)
+	)
+	private val detail_re(_, _, y_min_str, y_max_str) = getevent_p(
+		getevent_p.indexWhere(line => line.indexOf("%04x".format(ABS_MT_POSITION_Y)) >= 0)
+	)
+	val x_min = x_min_str.toInt
+	val x_max = x_max_str.toInt
+	val y_min = y_min_str.toInt
+	val y_max = y_max_str.toInt
 	
 	/*
 	private val getevent_lp = Shell.getProcessOutput("getevent -lp " + path).split("\n")
@@ -121,19 +142,22 @@ class InputDevice(path:String) {
 		//Shell.runCommand("sendevent " + path + " " + eventType + " " + event + " " + value)
 	}
 	
-	def sendTapEvents(x:Int, y:Int):Unit = {
-		val EV_ABS = 0x0003
-		val EV_SYN = 0x0000
-		val ABS_MT_POSITION_X = 0x0035
-		val ABS_MT_POSITION_Y = 0x0036
-		val ABS_MT_TRACKING_ID = 0x0039
-		val SYN_REPORT = 0x0000
-		sendEvent(EV_ABS, ABS_MT_TRACKING_ID, 0x00000001)
-		sendEvent(EV_ABS, ABS_MT_POSITION_X, x)
-		sendEvent(EV_ABS, ABS_MT_POSITION_Y, y)
-		sendEvent(EV_SYN, SYN_REPORT, 0)
-		sendEvent(EV_ABS, ABS_MT_TRACKING_ID, 0xffffffff)
-		sendEvent(EV_SYN, SYN_REPORT, 0)
-		sendEvent(EV_SYN, SYN_REPORT, 0xcccccccc)
+	def sendTapEvents(x:Double, y:Double):Unit = {
+		//https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt
+		if (isProtocolB) {
+			sendEvent(EV_ABS, ABS_MT_TRACKING_ID, 0x00000001)
+			sendEvent(EV_ABS, ABS_MT_POSITION_X, map(x, 0, 1, x_min, x_max).toInt)
+			sendEvent(EV_ABS, ABS_MT_POSITION_Y, map(y, 0, 1, y_min, y_max).toInt)
+			sendEvent(EV_SYN, SYN_REPORT, 0)
+			sendEvent(EV_ABS, ABS_MT_TRACKING_ID, 0xffffffff)
+			sendEvent(EV_SYN, SYN_REPORT, 0)
+		} else {
+			sendEvent(EV_ABS, ABS_MT_POSITION_X, map(x, 0, 1, x_min, x_max).toInt)
+			sendEvent(EV_ABS, ABS_MT_POSITION_Y, map(y, 0, 1, y_min, y_max).toInt)
+			sendEvent(EV_SYN, SYN_MT_REPORT, 0)
+			sendEvent(EV_SYN, SYN_REPORT, 0)
+			sendEvent(EV_SYN, SYN_MT_REPORT, 0)
+			sendEvent(EV_SYN, SYN_REPORT, 0)
+		}
 	}
 }

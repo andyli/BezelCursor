@@ -47,22 +47,22 @@ class TouchService extends AccessibilityService {
     override def onAccessibilityEvent(event:AccessibilityEvent) = {
     	//log("AccessibilityEvent " + AccessibilityEvent.eventTypeToString(event.getEventType()))
     	
-    	val src = event.getSource()
-    	if (src != null){
-        	src.getBoundsInScreen(mView.current_bound)
-        	
-        	mView.bounds.clear()
-    		var _root = src
-    		var _temp:AccessibilityNodeInfo = _root.getParent()
-    		while (_temp != null) {
-    			if (_root != src) _root.recycle()
-    			_root = _temp
-    			_temp = _root.getParent()
-    		}
-        	getBounds(_root, mView.bounds)
-    		
-        	mView.invalidate()
-    	}
+//    	val src = event.getSource()
+//    	if (src != null){
+//        	src.getBoundsInScreen(mView.current_bound)
+//        	
+//        	mView.bounds.clear()
+//    		var _root = src
+//    		var _temp:AccessibilityNodeInfo = _root.getParent()
+//    		while (_temp != null) {
+//    			if (_root != src) _root.recycle()
+//    			_root = _temp
+//    			_temp = _root.getParent()
+//    		}
+//        	getBounds(_root, mView.bounds)
+//    		
+//        	mView.invalidate()
+//    	}
     }
 
     override def onInterrupt() = {

@@ -22,7 +22,7 @@ class TouchService extends AccessibilityService {
     	val bound = new Rect()
     	
     	src.getBoundsInScreen(bound)
-    	results.add(new Rect(bound))
+    	results.add(bound)
     	
     	val childCount = src.getChildCount()
     	var c = 0

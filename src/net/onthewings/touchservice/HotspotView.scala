@@ -61,18 +61,20 @@ class HotspotView(service:TouchService) extends View(service) {
 		}
 		
 		evt.getAction() match {
-			case 0 => //down
+			case MotionEvent.ACTION_DOWN => //down
+				setVisibility(View.INVISIBLE)
 				down_position.set(evt.getRawX(), evt.getRawY())
 				service.mView.touch_position = down_position
 				service.mView.cursor_position = new PointF(evt.getRawX(), evt.getRawY())
-				setVisibility(View.INVISIBLE)
-			case 1 => //up
+				//service.touchDevice.sendBeginHoverEvents(service.mView.cursor_position.x / displaySize.x, service.mView.cursor_position.y / displaySize.y)
+			case MotionEvent.ACTION_UP => //up
 				service.mView.cursor_position.set(get_cursor_position(evt.getRawX(), evt.getRawY()))
 				service.touchDevice.sendTapEvents(service.mView.cursor_position.x / displaySize.x, service.mView.cursor_position.y / displaySize.y)
 				service.mView.cursor_position = null
 				setVisibility(View.VISIBLE)
-			case 2 => //move				
+			case MotionEvent.ACTION_MOVE => //move				
 				service.mView.cursor_position.set(get_cursor_position(evt.getRawX(), evt.getRawY()))
+				//service.touchDevice.sendHoverEvents(service.mView.cursor_position.x / displaySize.x, service.mView.cursor_position.y / displaySize.y)
 			case _ =>
 		}
 		service.mView.invalidate()

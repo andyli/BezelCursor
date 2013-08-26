@@ -142,18 +142,54 @@ class InputDevice(path:String) {
 		//Shell.runCommand("sendevent " + path + " " + eventType + " " + event + " " + value)
 	}
 	
+//	def sendBeginHoverEvents(x:Double, y:Double):Unit = {
+//		if (isProtocolB) {
+//			sendEvent(EV_ABS, ABS_MT_SLOT, 0x00000000)
+//			sendEvent(EV_ABS, ABS_MT_TRACKING_ID, 0x00000100)
+//			sendEvent(EV_ABS, ABS_MT_POSITION_X, map(x, 0, 1, x_min, x_max).toInt)
+//			sendEvent(EV_ABS, ABS_MT_POSITION_Y, map(y, 0, 1, y_min, y_max).toInt)
+//			sendEvent(EV_ABS, ABS_MT_PRESSURE, 0x00000000)
+//			sendEvent(EV_SYN, SYN_REPORT, 0)
+//		} else {
+//			sendEvent(EV_ABS, ABS_MT_POSITION_X, map(x, 0, 1, x_min, x_max).toInt)
+//			sendEvent(EV_ABS, ABS_MT_POSITION_Y, map(y, 0, 1, y_min, y_max).toInt)
+//			sendEvent(EV_ABS, ABS_MT_PRESSURE, 0x00000000)
+//			sendEvent(EV_SYN, SYN_MT_REPORT, 0)
+//			sendEvent(EV_SYN, SYN_REPORT, 0)
+//		}
+//	}
+//	
+//	def sendHoverEvents(x:Double, y:Double):Unit = {
+//		if (isProtocolB) {
+//			sendEvent(EV_ABS, ABS_MT_SLOT, 0x00000000)
+//			sendEvent(EV_ABS, ABS_MT_POSITION_X, map(x, 0, 1, x_min, x_max).toInt)
+//			sendEvent(EV_ABS, ABS_MT_POSITION_Y, map(y, 0, 1, y_min, y_max).toInt)
+//			sendEvent(EV_ABS, ABS_MT_PRESSURE, 0x00000000)
+//			sendEvent(EV_SYN, SYN_REPORT, 0)
+//		} else {
+//			sendEvent(EV_ABS, ABS_MT_POSITION_X, map(x, 0, 1, x_min, x_max).toInt)
+//			sendEvent(EV_ABS, ABS_MT_POSITION_Y, map(y, 0, 1, y_min, y_max).toInt)
+//			sendEvent(EV_ABS, ABS_MT_PRESSURE, 0x00000000)
+//			sendEvent(EV_SYN, SYN_MT_REPORT, 0)
+//			sendEvent(EV_SYN, SYN_REPORT, 0)
+//		}
+//	}
+	
 	def sendTapEvents(x:Double, y:Double):Unit = {
 		//https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt
 		if (isProtocolB) {
-			sendEvent(EV_ABS, ABS_MT_TRACKING_ID, 0x00000001)
+			sendEvent(EV_ABS, ABS_MT_SLOT, 0x00000000)
+			sendEvent(EV_ABS, ABS_MT_TRACKING_ID, 0x00000100)
 			sendEvent(EV_ABS, ABS_MT_POSITION_X, map(x, 0, 1, x_min, x_max).toInt)
 			sendEvent(EV_ABS, ABS_MT_POSITION_Y, map(y, 0, 1, y_min, y_max).toInt)
+			//sendEvent(EV_ABS, ABS_MT_PRESSURE, 0x00000001)
 			sendEvent(EV_SYN, SYN_REPORT, 0)
 			sendEvent(EV_ABS, ABS_MT_TRACKING_ID, 0xffffffff)
 			sendEvent(EV_SYN, SYN_REPORT, 0)
 		} else {
 			sendEvent(EV_ABS, ABS_MT_POSITION_X, map(x, 0, 1, x_min, x_max).toInt)
 			sendEvent(EV_ABS, ABS_MT_POSITION_Y, map(y, 0, 1, y_min, y_max).toInt)
+			//sendEvent(EV_ABS, ABS_MT_PRESSURE, 0x00000001)
 			sendEvent(EV_SYN, SYN_MT_REPORT, 0)
 			sendEvent(EV_SYN, SYN_REPORT, 0)
 			sendEvent(EV_SYN, SYN_MT_REPORT, 0)

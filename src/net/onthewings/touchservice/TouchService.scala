@@ -17,6 +17,14 @@ import java.util.ArrayList
 import Utils._
 
 class TouchService extends AccessibilityService {
+
+    lazy val mView = new OverlayView(this)
+    lazy val hotspotView_l:HotspotView = new HotspotView(this)
+    lazy val hotspotView_r:HotspotView = new HotspotView(this)    
+    lazy val touchDevice = new TouchInputDevice(
+		InputDevice.getTouchDevicePath(),
+		getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager].getDefaultDisplay()
+    )
 	
 	final def getBounds(src:AccessibilityNodeInfo, results:List[Rect]):Unit = {
     	val bound = new Rect()
@@ -38,11 +46,6 @@ class TouchService extends AccessibilityService {
     	
     	src.recycle()
     }
-
-    var mView:OverlayView = null
-    var hotspotView_l:HotspotView = null
-    var hotspotView_r:HotspotView = null
-    //private Events events = new Events();
 
     override def onAccessibilityEvent(event:AccessibilityEvent) = {
     	//log("AccessibilityEvent " + AccessibilityEvent.eventTypeToString(event.getEventType()))
@@ -68,8 +71,6 @@ class TouchService extends AccessibilityService {
     override def onInterrupt() = {
     	
     }
-    
-    val touchDevice = new InputDevice(InputDevice.getTouchDevicePath())
 
     override def onServiceConnected() = {
     	log("onServiceConnected")
@@ -82,7 +83,6 @@ class TouchService extends AccessibilityService {
 
         val wm = getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager]
         
-        mView = new OverlayView(this);
         val params = new WindowManager.LayoutParams(
 			ViewGroup.LayoutParams.WRAP_CONTENT,
 			ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -99,14 +99,10 @@ class TouchService extends AccessibilityService {
         params.gravity = Gravity.FILL
         wm.addView(mView, params)
         
-        
-        hotspotView_l = new HotspotView(this)
         val params_hotspot_l = hotspotView_l.getLayoutParams().asInstanceOf[WindowManager.LayoutParams]
         params_hotspot_l.gravity = Gravity.LEFT
         wm.addView(hotspotView_l, params_hotspot_l)
         
-        
-        hotspotView_r = new HotspotView(this)
         val params_hotspot_r = hotspotView_r.getLayoutParams().asInstanceOf[WindowManager.LayoutParams]
         params_hotspot_r.gravity = Gravity.RIGHT
         wm.addView(hotspotView_r, params_hotspot_r)
@@ -121,5 +117,7 @@ class TouchService extends AccessibilityService {
     override def onDestroy() = {
     	val wm = getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager]
         wm.removeView(mView)
+        wm.removeView(hotspotView_l)
+        wm.removeView(hotspotView_r)
     }
 }

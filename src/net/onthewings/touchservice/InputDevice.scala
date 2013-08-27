@@ -70,68 +70,15 @@ class AbsInputEvent(id:Int, name:String, value:Int, min:Int, max:Int, fuzz:Int, 
 }
 
 class InputDevice(path:String) {
-	private val getevent_p = if (Shell.isSuAvailable())
+	protected val getevent_p = if (Shell.isSuAvailable())
 		Shell.getProcessOutput("getevent -p " + path).split("\n")
 	else
 		null
-	private val name_re = """\s*name:\s*"(.*)"\s*""".r
-	private val detail_re = """\s*([0-9a-f]+)\s+:?\s*value\s+([0-9]+),?\s+min\s+([0-9]+),?\s+max\s+([0-9]+),.+""".r
+	protected val name_re = """\s*name:\s*"(.*)"\s*""".r
+	protected val detail_re = """\s*([0-9a-f]+)\s+:?\s*value\s+([0-9]+),?\s+min\s+([0-9]+),?\s+max\s+([0-9]+),.+""".r
 	
 	val name_re(name) = getevent_p(1)
-	val isProtocolB = getevent_p.indexWhere(line => line.indexOf("%04x".format(ABS_MT_SLOT)) >= 0) >= 0
 	
-	log(if (isProtocolB) path + " is B" else path + " is A")
-	private val detail_re(_, _, x_min_str, x_max_str) = getevent_p(
-		getevent_p.indexWhere(line => line.indexOf("%04x".format(ABS_MT_POSITION_X)) >= 0)
-	)
-	private val detail_re(_, _, y_min_str, y_max_str) = getevent_p(
-		getevent_p.indexWhere(line => line.indexOf("%04x".format(ABS_MT_POSITION_Y)) >= 0)
-	)
-	val x_min = x_min_str.toInt
-	val x_max = x_max_str.toInt
-	val y_min = y_min_str.toInt
-	val y_max = y_max_str.toInt
-	
-	/*
-	private val getevent_lp = Shell.getProcessOutput("getevent -lp " + path).split("\n")
-	
-	private val events_lp = getevent_lp.slice(
-		getevent_lp.indexWhere(line => line.indexOf("events:") > -1) + 1,
-		getevent_lp.indexWhere(line => line.indexOf("input props:") > -1)
-	)
-	private val events_p = getevent_p.slice(
-		getevent_p.indexWhere(line => line.indexOf("events:") > -1) + 1,
-		getevent_p.indexWhere(line => line.indexOf("input props:") > -1)
-	)
-	
-	val absEvents = new HashMap[String,AbsInputEvent]()
-	private val eventType_re = """\s*([A-Z]{3}) \(([0-9]{4})\): """.r
-	private val eventDetail_re = """\s*([^\s]+)\s*:? value (-?[0-9]+), min (-?[0-9]+), max (-?[0-9]+), fuzz (-?[0-9]+), flat (-?[0-9]+), resolution (-?[0-9]+)\s*""".r
-	private var _type:Int = -1
-	for ((line_lp, line_p) <- events_lp.zip(events_p)) {
-		eventType_re.findFirstIn(line_lp) match {
-			case Some(eventType_re(t, n)) =>
-				_type = n.toInt				
-				_type match {
-					case 3 =>
-						val eventDetail_re(name, value, min, max, fuzz, flat, resolution) = eventType_re.replaceFirstIn(line_lp, "")
-						val eventDetail_re(id, _, _, _, _, _, _) = eventType_re.replaceFirstIn(line_p, "")
-						absEvents(name) = new AbsInputEvent(Integer.parseInt(id, 16), name, value.toInt, min.toInt, max.toInt, fuzz.toInt, flat.toInt, resolution.toInt)
-					case _ =>
-				}
-				
-			case None =>
-				_type match {
-					case 3 =>
-						val eventDetail_re(name, value, min, max, fuzz, flat, resolution) = line_lp
-						val eventDetail_re(id, _, _, _, _, _, _) = line_p
-						absEvents(name) = new AbsInputEvent(Integer.parseInt(id, 16), name, value.toInt, min.toInt, max.toInt, fuzz.toInt, flat.toInt, resolution.toInt)
-					case _ =>
-				}
-		}
-	}
-	//log("eventTypes(3).keySet" + absEvents.keySet)
-	 */
 	def open():Boolean = {
 		return InputDevice.Open(path)
 	}
@@ -140,60 +87,5 @@ class InputDevice(path:String) {
 		val sendEventSuccess = InputDevice.SendEvent(path, eventType, event, value)
 		log("sendEventSuccess " + sendEventSuccess)
 		//Shell.runCommand("sendevent " + path + " " + eventType + " " + event + " " + value)
-	}
-	
-//	def sendBeginHoverEvents(x:Double, y:Double):Unit = {
-//		if (isProtocolB) {
-//			sendEvent(EV_ABS, ABS_MT_SLOT, 0x00000000)
-//			sendEvent(EV_ABS, ABS_MT_TRACKING_ID, 0x00000100)
-//			sendEvent(EV_ABS, ABS_MT_POSITION_X, map(x, 0, 1, x_min, x_max).toInt)
-//			sendEvent(EV_ABS, ABS_MT_POSITION_Y, map(y, 0, 1, y_min, y_max).toInt)
-//			sendEvent(EV_ABS, ABS_MT_PRESSURE, 0x00000000)
-//			sendEvent(EV_SYN, SYN_REPORT, 0)
-//		} else {
-//			sendEvent(EV_ABS, ABS_MT_POSITION_X, map(x, 0, 1, x_min, x_max).toInt)
-//			sendEvent(EV_ABS, ABS_MT_POSITION_Y, map(y, 0, 1, y_min, y_max).toInt)
-//			sendEvent(EV_ABS, ABS_MT_PRESSURE, 0x00000000)
-//			sendEvent(EV_SYN, SYN_MT_REPORT, 0)
-//			sendEvent(EV_SYN, SYN_REPORT, 0)
-//		}
-//	}
-//	
-//	def sendHoverEvents(x:Double, y:Double):Unit = {
-//		if (isProtocolB) {
-//			sendEvent(EV_ABS, ABS_MT_SLOT, 0x00000000)
-//			sendEvent(EV_ABS, ABS_MT_POSITION_X, map(x, 0, 1, x_min, x_max).toInt)
-//			sendEvent(EV_ABS, ABS_MT_POSITION_Y, map(y, 0, 1, y_min, y_max).toInt)
-//			sendEvent(EV_ABS, ABS_MT_PRESSURE, 0x00000000)
-//			sendEvent(EV_SYN, SYN_REPORT, 0)
-//		} else {
-//			sendEvent(EV_ABS, ABS_MT_POSITION_X, map(x, 0, 1, x_min, x_max).toInt)
-//			sendEvent(EV_ABS, ABS_MT_POSITION_Y, map(y, 0, 1, y_min, y_max).toInt)
-//			sendEvent(EV_ABS, ABS_MT_PRESSURE, 0x00000000)
-//			sendEvent(EV_SYN, SYN_MT_REPORT, 0)
-//			sendEvent(EV_SYN, SYN_REPORT, 0)
-//		}
-//	}
-	
-	def sendTapEvents(x:Double, y:Double):Unit = {
-		//https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt
-		if (isProtocolB) {
-			sendEvent(EV_ABS, ABS_MT_SLOT, 0x00000000)
-			sendEvent(EV_ABS, ABS_MT_TRACKING_ID, 0x00000100)
-			sendEvent(EV_ABS, ABS_MT_POSITION_X, map(x, 0, 1, x_min, x_max).toInt)
-			sendEvent(EV_ABS, ABS_MT_POSITION_Y, map(y, 0, 1, y_min, y_max).toInt)
-			//sendEvent(EV_ABS, ABS_MT_PRESSURE, 0x00000001)
-			sendEvent(EV_SYN, SYN_REPORT, 0)
-			sendEvent(EV_ABS, ABS_MT_TRACKING_ID, 0xffffffff)
-			sendEvent(EV_SYN, SYN_REPORT, 0)
-		} else {
-			sendEvent(EV_ABS, ABS_MT_POSITION_X, map(x, 0, 1, x_min, x_max).toInt)
-			sendEvent(EV_ABS, ABS_MT_POSITION_Y, map(y, 0, 1, y_min, y_max).toInt)
-			//sendEvent(EV_ABS, ABS_MT_PRESSURE, 0x00000001)
-			sendEvent(EV_SYN, SYN_MT_REPORT, 0)
-			sendEvent(EV_SYN, SYN_REPORT, 0)
-			sendEvent(EV_SYN, SYN_MT_REPORT, 0)
-			sendEvent(EV_SYN, SYN_REPORT, 0)
-		}
 	}
 }

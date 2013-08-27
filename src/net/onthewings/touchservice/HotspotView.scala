@@ -28,12 +28,7 @@ class HotspotView(service:TouchService) extends View(service) {
 	paint.setColor(Color.WHITE)
 	paint.setAlpha(10)
 	
-	private val wm = getContext().getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager]
-	private val display = wm.getDefaultDisplay()
-	private val displaySize = new Point(display.getWidth(), display.getHeight())
-	//display.getSize(displaySize)
-	
-	setLayoutParams(new WindowManager.LayoutParams(
+	private val layoutParams = new WindowManager.LayoutParams(
 		width,
 		ViewGroup.LayoutParams.WRAP_CONTENT,
 		WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
@@ -42,7 +37,8 @@ class HotspotView(service:TouchService) extends View(service) {
 		|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
 		,
 		PixelFormat.RGBA_8888
-	))
+	)
+	setLayoutParams(layoutParams)
 
 	def getService():TouchService = {
 		return getContext().asInstanceOf[TouchService]
@@ -69,7 +65,7 @@ class HotspotView(service:TouchService) extends View(service) {
 				//service.touchDevice.sendBeginHoverEvents(service.mView.cursor_position.x / displaySize.x, service.mView.cursor_position.y / displaySize.y)
 			case MotionEvent.ACTION_UP => //up
 				service.mView.cursor_position.set(get_cursor_position(evt.getRawX(), evt.getRawY()))
-				service.touchDevice.sendTapEvents(service.mView.cursor_position.x / displaySize.x, service.mView.cursor_position.y / displaySize.y)
+				service.touchDevice.sendTapEvents(service.mView.cursor_position.x, service.mView.cursor_position.y)
 				service.mView.cursor_position = null
 				setVisibility(View.VISIBLE)
 			case MotionEvent.ACTION_MOVE => //move				

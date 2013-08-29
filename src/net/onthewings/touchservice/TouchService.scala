@@ -26,11 +26,11 @@ class TouchService extends AccessibilityService {
 		getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager].getDefaultDisplay()
     )
 	
-	final def getBounds(src:AccessibilityNodeInfo, results:List[Rect]):Unit = {
+	final def getBounds(src:AccessibilityNodeInfo, results:List[(Rect,Boolean)]):Unit = {
     	val bound = new Rect()
     	
     	src.getBoundsInScreen(bound)
-    	results.add(bound)
+    	results.add((bound, src.isClickable() || src.isCheckable() || src.isFocusable()))
     	
     	val childCount = src.getChildCount()
     	var c = 0
@@ -48,24 +48,32 @@ class TouchService extends AccessibilityService {
     }
 
     override def onAccessibilityEvent(event:AccessibilityEvent) = {
-    	//log("AccessibilityEvent " + AccessibilityEvent.eventTypeToString(event.getEventType()))
+    	log("AccessibilityEvent " + AccessibilityEvent.eventTypeToString(event.getEventType()))
     	
-//    	val src = event.getSource()
-//    	if (src != null){
-//        	src.getBoundsInScreen(mView.current_bound)
-//        	
-//        	mView.bounds.clear()
-//    		var _root = src
-//    		var _temp:AccessibilityNodeInfo = _root.getParent()
-//    		while (_temp != null) {
-//    			if (_root != src) _root.recycle()
-//    			_root = _temp
-//    			_temp = _root.getParent()
-//    		}
-//        	getBounds(_root, mView.bounds)
-//    		
-//        	mView.invalidate()
-//    	}
+    	event.getEventType() match {
+    		case AccessibilityEvent.TYPE_VIEW_FOCUSED
+    		|    AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+    		|    AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+    		|    AccessibilityEvent.TYPE_VIEW_SCROLLED
+    		=>
+    			val src = event.getSource()
+		    	if (src != null){
+		        	src.getBoundsInScreen(mView.current_bound)
+		        	
+		        	mView.bounds.clear()
+		    		var _root = src
+		    		var _temp:AccessibilityNodeInfo = _root.getParent()
+		    		while (_temp != null) {
+		    			if (_root != src) _root.recycle()
+		    			_root = _temp
+		    			_temp = _root.getParent()
+		    		}
+		        	getBounds(_root, mView.bounds)
+		    		
+		        	mView.invalidate()
+		    	}
+    		case _ =>
+    	}
     }
 
     override def onInterrupt() = {

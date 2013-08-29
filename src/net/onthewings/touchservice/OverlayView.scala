@@ -17,15 +17,21 @@ import android.graphics.PointF
 class OverlayView(service:TouchService) extends View(service) {
 
 	val current_bound = new Rect()
-	val bounds = new LinkedList[Rect]()
+	val bounds = new LinkedList[(Rect, Boolean)]()
 	val current_paint = new Paint()
 	val paint = new Paint()
 	val cursor_paint = new Paint()
 	val line_paint = new Paint()
+	val clickable_paint = new Paint()
 
 	paint.setColor(Color.WHITE)
-	paint.setStrokeWidth(2)
+	paint.setAlpha(50)
+	paint.setStrokeWidth(1)
 	paint.setStyle(Paint.Style.STROKE)
+
+	clickable_paint.setColor(Color.YELLOW)
+	clickable_paint.setStrokeWidth(2)
+	clickable_paint.setStyle(Paint.Style.STROKE)
 	
 	current_paint.setColor(Color.GREEN)
 	current_paint.setStrokeWidth(2)
@@ -34,10 +40,12 @@ class OverlayView(service:TouchService) extends View(service) {
 	//current_paint.setStyle(Paint.Style.FILL)
 
 	cursor_paint.setColor(Color.GREEN)
+	cursor_paint.setAntiAlias(true)
 	cursor_paint.setStrokeWidth(4)
 	cursor_paint.setStyle(Paint.Style.STROKE)
 
 	line_paint.setColor(Color.GREEN)
+	line_paint.setAntiAlias(true)
 	line_paint.setStrokeWidth(6)
 	line_paint.setStyle(Paint.Style.STROKE)
 	
@@ -51,7 +59,11 @@ class OverlayView(service:TouchService) extends View(service) {
     override def onDraw(canvas:Canvas) = {                
         if (cursor_position != null) {
 	        for (bound <- bounds) {
-	        	canvas.drawRect(bound, paint)
+	        	if (bound._2) {
+	        		canvas.drawRect(bound._1, clickable_paint)
+	        	} else {
+	        		canvas.drawRect(bound._1, paint)
+	        	}
 	        }
 	        canvas.drawRect(current_bound, current_paint)
 	        

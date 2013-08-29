@@ -5,6 +5,7 @@ import LinuxInput._
 import android.view.Display
 import android.view.Surface
 import android.graphics.Point
+import android.os.Build
 
 class TouchInputDevice(path:String, display:Display) extends InputDevice(path) {
 	val isProtocolB = getevent_p.indexWhere(line => line.indexOf("%04x".format(ABS_MT_SLOT)) >= 0) >= 0
@@ -23,7 +24,12 @@ class TouchInputDevice(path:String, display:Display) extends InputDevice(path) {
 	
 	def displayToDevice(x:Double, y:Double):Point = {
 		val displaySize = new Point()
-		display.getSize(displaySize)
+		if (Build.VERSION.SDK_INT >= 13) {
+			display.getSize(displaySize)
+		} else {
+			displaySize.set(display.getWidth(), display.getHeight())
+		}
+		
 		log("display " + displaySize.x + " " + displaySize.y + " " + display.getRotation())
 		display.getRotation() match {
 			case Surface.ROTATION_0 =>

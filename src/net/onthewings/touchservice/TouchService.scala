@@ -15,17 +15,10 @@ import java.util.List
 import java.util.LinkedList
 import java.util.ArrayList
 import Utils._
+import java.util.concurrent.Callable
+import java.util.concurrent.FutureTask
 
-class TouchService extends AccessibilityService {
-
-    lazy val mView = new OverlayView(this)
-    lazy val hotspotView_l:HotspotView = new HotspotView(this)
-    lazy val hotspotView_r:HotspotView = new HotspotView(this)    
-    lazy val touchDevice = new TouchInputDevice(
-		InputDevice.getTouchDevicePath(),
-		getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager].getDefaultDisplay()
-    )
-	
+class OnAccessibilityEvent(node:AccessibilityNodeInfo) extends Callable[LinkedList[(Rect, Boolean)]] {
 	final def getBounds(src:AccessibilityNodeInfo, results:List[(Rect,Boolean)]):Unit = {
     	val bound = new Rect()
     	
@@ -46,7 +39,25 @@ class TouchService extends AccessibilityService {
     	
     	src.recycle()
     }
+	
+	def call():LinkedList[(Rect, Boolean)] = {
+		val list = new LinkedList[(Rect, Boolean)]
+    	getBounds(node, list)
+    	return list
+    }
+}
 
+class TouchService extends AccessibilityService {
+
+    lazy val mView = new OverlayView(this)
+    lazy val hotspotView_l:HotspotView = new HotspotView(this)
+    lazy val hotspotView_r:HotspotView = new HotspotView(this)    
+    lazy val touchDevice = new TouchInputDevice(
+		InputDevice.getTouchDevicePath(),
+		getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager].getDefaultDisplay()
+    )
+    
+    var task:FutureTask[LinkedList[(Rect, Boolean)]] = null
     override def onAccessibilityEvent(event:AccessibilityEvent) = {
     	log("AccessibilityEvent " + AccessibilityEvent.eventTypeToString(event.getEventType()))
     	
@@ -68,12 +79,16 @@ class TouchService extends AccessibilityService {
 		    			_root = _temp
 		    			_temp = _root.getParent()
 		    		}
-		        	getBounds(_root, mView.bounds)
-		    		
-		        	mView.invalidate()
+		        	if (task != null) {
+		        		task.cancel(false)
+		        	}
+		        	task = new FutureTask(new OnAccessibilityEvent(_root))
+		        	task.run()
+		        	//mView.invalidate()
 		    	}
     		case _ =>
     	}
+    	
     }
 
     override def onInterrupt() = {

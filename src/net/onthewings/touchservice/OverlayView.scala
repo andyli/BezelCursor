@@ -11,13 +11,15 @@ import android.view.WindowManager
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
 import java.util.LinkedList
+import java.util.concurrent.TimeUnit
 import Utils._
 import android.graphics.PointF
+import java.util.concurrent.TimeoutException
 
 class OverlayView(service:TouchService) extends View(service) {
 
 	val current_bound = new Rect()
-	val bounds = new LinkedList[(Rect, Boolean)]()
+	var bounds = new LinkedList[(Rect, Boolean)]()
 	val current_paint = new Paint()
 	val paint = new Paint()
 	val cursor_paint = new Paint()
@@ -58,6 +60,16 @@ class OverlayView(service:TouchService) extends View(service) {
 	
     override def onDraw(canvas:Canvas) = {                
         if (cursor_position != null) {
+        	try {
+        		bounds = getService().task.get(0, TimeUnit.SECONDS)
+        	} catch {
+        		case e:TimeoutException =>
+        			//pass
+        		case e:Exception =>
+        			log("get bound error: " + e.toString())
+        	}
+        	
+        	
 	        for (bound <- bounds) {
 	        	if (bound._2) {
 	        		canvas.drawRect(bound._1, clickable_paint)

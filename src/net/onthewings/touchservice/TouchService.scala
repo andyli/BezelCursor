@@ -80,7 +80,7 @@ class TouchService extends AccessibilityService {
 		    			_temp = _root.getParent()
 		    		}
 		        	if (task != null) {
-		        		task.cancel(false)
+		        		task.cancel(true)
 		        	}
 		        	task = new FutureTask(new OnAccessibilityEvent(_root))
 		        	task.run()

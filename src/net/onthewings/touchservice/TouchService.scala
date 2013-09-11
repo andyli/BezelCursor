@@ -10,20 +10,19 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.view.ViewGroup
 import android.content.Context
 import scala.collection.mutable.ListBuffer
-import scala.collection.JavaConversions._
-import java.util.List
-import java.util.LinkedList
-import java.util.ArrayList
 import Utils._
 import java.util.concurrent.Callable
 import java.util.concurrent.FutureTask
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
-class OnAccessibilityEvent(node:AccessibilityNodeInfo) extends Callable[LinkedList[(Rect, Boolean)]] {
-	final def getBounds(src:AccessibilityNodeInfo, results:List[(Rect,Boolean)]):Unit = {
+class OnAccessibilityEvent(node:AccessibilityNodeInfo) extends Callable[List[(Rect, Boolean)]] {
+	final def getBounds(src:AccessibilityNodeInfo, results:ListBuffer[(Rect,Boolean)]):Unit = {
     	val bound = new Rect()
     	
     	src.getBoundsInScreen(bound)
-    	results.add((bound, src.isClickable() || src.isCheckable() || src.isFocusable()))
+    	
+    	results += ((bound, src.isClickable() || src.isCheckable() || src.isFocusable()))
     	
     	val childCount = src.getChildCount()
     	var c = 0
@@ -40,10 +39,18 @@ class OnAccessibilityEvent(node:AccessibilityNodeInfo) extends Callable[LinkedLi
     	src.recycle()
     }
 	
-	def call():LinkedList[(Rect, Boolean)] = {
-		val list = new LinkedList[(Rect, Boolean)]
-    	getBounds(node, list)
-    	return list
+	def call():List[(Rect, Boolean)] = {
+		var _root = node
+		var _temp:AccessibilityNodeInfo = _root.getParent()
+		while (_temp != null) {
+			if (_root != node) _root.recycle()
+			_root = _temp
+			_temp = _root.getParent()
+		}
+    	
+		val list = new ListBuffer[(Rect, Boolean)]
+    	getBounds(_root, list)
+    	return list.toList
     }
 }
 
@@ -57,7 +64,20 @@ class TouchService extends AccessibilityService {
 		getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager].getDefaultDisplay()
     )
     
-    var task:FutureTask[LinkedList[(Rect, Boolean)]] = null
+    def getBounds():List[(Rect, Boolean)] = {
+    	return if (task == null) {
+    		Nil
+    	} else {
+    		try {
+    			task.get(0, TimeUnit.SECONDS)
+        	} catch {
+        		case e:TimeoutException =>
+        			Nil
+        	}
+    	}
+    }
+    
+    protected var task:FutureTask[List[(Rect, Boolean)]] = null
     override def onAccessibilityEvent(event:AccessibilityEvent) = {
     	log("AccessibilityEvent " + AccessibilityEvent.eventTypeToString(event.getEventType()))
     	
@@ -71,18 +91,10 @@ class TouchService extends AccessibilityService {
 		    	if (src != null){
 		        	src.getBoundsInScreen(mView.current_bound)
 		        	
-		        	mView.bounds.clear()
-		    		var _root = src
-		    		var _temp:AccessibilityNodeInfo = _root.getParent()
-		    		while (_temp != null) {
-		    			if (_root != src) _root.recycle()
-		    			_root = _temp
-		    			_temp = _root.getParent()
-		    		}
-		        	if (task != null) {
-		        		task.cancel(true)
-		        	}
-		        	task = new FutureTask(new OnAccessibilityEvent(_root))
+			    	if (task != null) {
+			    		task.cancel(true)
+			    	}
+		        	task = new FutureTask(new OnAccessibilityEvent(src))
 		        	task.run()
 		        	//mView.invalidate()
 		    	}

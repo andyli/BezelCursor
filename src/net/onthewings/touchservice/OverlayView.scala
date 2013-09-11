@@ -3,23 +3,18 @@ package net.onthewings.touchservice;
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.PointF
 import android.graphics.Rect
 import android.view.DragEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import scala.collection.mutable.ListBuffer
-import scala.collection.JavaConversions._
-import java.util.LinkedList
-import java.util.concurrent.TimeUnit
 import Utils._
-import android.graphics.PointF
-import java.util.concurrent.TimeoutException
 
 class OverlayView(service:TouchService) extends View(service) {
 
 	val current_bound = new Rect()
-	var bounds = new LinkedList[(Rect, Boolean)]()
 	val current_paint = new Paint()
 	val paint = new Paint()
 	val cursor_paint = new Paint()
@@ -60,16 +55,8 @@ class OverlayView(service:TouchService) extends View(service) {
 	
     override def onDraw(canvas:Canvas) = {                
         if (cursor_position != null) {
-        	try {
-        		bounds = getService().task.get(0, TimeUnit.SECONDS)
-        	} catch {
-        		case e:TimeoutException =>
-        			//pass
-        		case e:Exception =>
-        			log("get bound error: " + e.toString())
-        	}
-        	
-        	
+    		val bounds = getService().getBounds()
+    		
 	        for (bound <- bounds) {
 	        	if (bound._2) {
 	        		canvas.drawRect(bound._1, clickable_paint)

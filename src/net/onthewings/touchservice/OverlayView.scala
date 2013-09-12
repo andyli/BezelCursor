@@ -11,9 +11,11 @@ import android.view.View
 import android.view.WindowManager
 import scala.collection.mutable.ListBuffer
 import Utils._
+import aurelienribon.tweenengine.Tween
+import aurelienribon.tweenengine.TweenManager
+import net.onthewings.touchservice.tween.PaintAccessor
 
 class OverlayView(service:TouchService) extends View(service) {
-
 	val current_bound = new Rect()
 	val current_paint = new Paint()
 	val paint = new Paint()
@@ -48,12 +50,29 @@ class OverlayView(service:TouchService) extends View(service) {
 	
 	var touch_position:PointF = null
 	var cursor_position:PointF = null
+	
+	val tweenManager = new TweenManager()
+	PaintAccessor.register()
+	import PaintAccessor.PaintProperty
+	
+	val flashTween = Tween
+		.to(cursor_paint, PaintProperty.alpha.id, 0.5f)
+		.target(100)
+		.repeatYoyo(-1, 0)
+		.start(tweenManager)
 
 	def getService():TouchService = {
 		return getContext().asInstanceOf[TouchService]
 	}
 	
-    override def onDraw(canvas:Canvas) = {                
+	var lastMillis:Long = -1
+    override def onDraw(canvas:Canvas) = {
+		val currentMillis = System.currentTimeMillis()
+		if (lastMillis < 0) {
+			lastMillis = currentMillis
+		}
+    	tweenManager.update((currentMillis - lastMillis) / 1000f)
+    	
         if (cursor_position != null) {
     		val bounds = getService().getBounds()
     		
@@ -70,15 +89,8 @@ class OverlayView(service:TouchService) extends View(service) {
         	canvas.drawCircle(cursor_position.x, cursor_position.y, 2, cursor_paint)
         	canvas.drawCircle(cursor_position.x, cursor_position.y, 25, cursor_paint)
         }
+    	
+    	invalidate()
+    	lastMillis = currentMillis
     }
-	
-	override def onTouchEvent(evt:MotionEvent):Boolean = {
-		log("onTouchEvent " + evt.getX() + "," + evt.getY() + "," + evt.getAction())
-		return false
-	}
-	
-	override def onDragEvent(evt:DragEvent):Boolean = {
-		log("onDragEvent")
-		return true
-	}
 }

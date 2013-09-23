@@ -3,40 +3,39 @@ package net.onthewings.touchservice;
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.PointF
 import android.graphics.Rect
-import android.view.DragEvent
-import android.view.MotionEvent
 import android.view.View
-import android.view.WindowManager
-import scala.collection.mutable.ListBuffer
-import Utils._
 import aurelienribon.tweenengine.Tween
 import aurelienribon.tweenengine.TweenManager
 import net.onthewings.touchservice.tween.PaintAccessor
+import net.onthewings.touchservice.tween.PaintAccessor.PaintProperty
+import Utils.map
 
 class OverlayView(service:TouchService) extends View(service) {
 	val current_bound = new Rect()
-	val current_paint = new Paint()
-	val paint = new Paint()
+	
+	val cursor_path = new Path()
+	
+	val current_bound_paint = new Paint()
+	val bounds_paint = new Paint()
+	val clickable_bounds_paint = new Paint()
 	val cursor_paint = new Paint()
 	val line_paint = new Paint()
-	val clickable_paint = new Paint()
 
-	paint.setColor(Color.WHITE)
-	paint.setAlpha(50)
-	paint.setStrokeWidth(1)
-	paint.setStyle(Paint.Style.STROKE)
+	bounds_paint.setColor(Color.WHITE)
+	bounds_paint.setAlpha(50)
+	bounds_paint.setStrokeWidth(1)
+	bounds_paint.setStyle(Paint.Style.STROKE)
 
-	clickable_paint.setColor(Color.YELLOW)
-	clickable_paint.setStrokeWidth(2)
-	clickable_paint.setStyle(Paint.Style.STROKE)
+	clickable_bounds_paint.setColor(Color.YELLOW)
+	clickable_bounds_paint.setStrokeWidth(2)
+	clickable_bounds_paint.setStyle(Paint.Style.STROKE)
 	
-	current_paint.setColor(Color.GREEN)
-	current_paint.setStrokeWidth(2)
-	current_paint.setStyle(Paint.Style.STROKE)
-	//current_paint.setAlpha(100)
-	//current_paint.setStyle(Paint.Style.FILL)
+	current_bound_paint.setColor(Color.GREEN)
+	current_bound_paint.setStrokeWidth(2)
+	current_bound_paint.setStyle(Paint.Style.STROKE)
 
 	cursor_paint.setColor(Color.GREEN)
 	cursor_paint.setAntiAlias(true)
@@ -44,11 +43,12 @@ class OverlayView(service:TouchService) extends View(service) {
 	cursor_paint.setStyle(Paint.Style.STROKE)
 
 	line_paint.setColor(Color.GREEN)
+	line_paint.setAlpha(50)
 	line_paint.setAntiAlias(true)
-	line_paint.setStrokeWidth(6)
-	line_paint.setStyle(Paint.Style.STROKE)
+	line_paint.setStyle(Paint.Style.FILL)
 	
-	var touch_position:PointF = null
+	var init_touch_position:PointF = null
+	var current_touch_position:PointF = null
 	var cursor_position:PointF = null
 	
 	val tweenManager = new TweenManager()
@@ -78,15 +78,29 @@ class OverlayView(service:TouchService) extends View(service) {
     		
 	        for (bound <- bounds) {
 	        	if (bound._2) {
-	        		canvas.drawRect(bound._1, clickable_paint)
+	        		canvas.drawRect(bound._1, clickable_bounds_paint)
 	        	} else {
-	        		canvas.drawRect(bound._1, paint)
+	        		canvas.drawRect(bound._1, bounds_paint)
 	        	}
 	        }
-	        canvas.drawRect(current_bound, current_paint)
+	        canvas.drawRect(current_bound, current_bound_paint)
 	        
-        	canvas.drawLine(touch_position.x, touch_position.y, cursor_position.x, cursor_position.y, line_paint)
-        	canvas.drawCircle(cursor_position.x, cursor_position.y, 2, cursor_paint)
+	        val drag_vec = new PointF(cursor_position.x - init_touch_position.x, cursor_position.y - init_touch_position.y)
+	        val drag_len = drag_vec.length()
+	        val path_start_radius = map(drag_len, 0, 4000, 5, 150).toInt
+	        val path_end_radius = 5
+	        val control_ratio = map(drag_len, 0, 4000, 0, 1)
+	        val control_pt = new PointF((init_touch_position.x + drag_vec.x * control_ratio).toFloat, (init_touch_position.y + drag_vec.y * control_ratio).toFloat)
+	        
+	        cursor_path.reset()
+	        cursor_path.moveTo(init_touch_position.x, init_touch_position.y - path_start_radius)
+	        cursor_path.quadTo(control_pt.x, control_pt.y, cursor_position.x, cursor_position.y - path_end_radius)
+	        cursor_path.lineTo(cursor_position.x, cursor_position.y + path_end_radius)
+	        cursor_path.quadTo(control_pt.x, control_pt.y, init_touch_position.x, init_touch_position.y + path_start_radius)
+	        cursor_path.close()
+	        canvas.drawPath(cursor_path, line_paint)
+	        
+        	canvas.drawCircle(cursor_position.x, cursor_position.y, 1, cursor_paint)
         	canvas.drawCircle(cursor_position.x, cursor_position.y, 25, cursor_paint)
         }
     	

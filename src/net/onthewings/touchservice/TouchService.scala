@@ -1,20 +1,22 @@
 package net.onthewings.touchservice;
 
-import android.accessibilityservice.AccessibilityService
-import android.graphics.PixelFormat
-import android.graphics.Rect
-import android.view.Gravity
-import android.view.WindowManager
-import android.view.accessibility.AccessibilityEvent
-import android.view.accessibility.AccessibilityNodeInfo
-import android.view.ViewGroup
-import android.content.Context
-import scala.collection.mutable.ListBuffer
-import Utils._
 import java.util.concurrent.Callable
 import java.util.concurrent.FutureTask
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+
+import scala.collection.mutable.ListBuffer
+
+import Utils.log
+import android.accessibilityservice.AccessibilityService
+import android.content.Context
+import android.graphics.PixelFormat
+import android.graphics.Rect
+import android.view.Gravity
+import android.view.ViewGroup
+import android.view.WindowManager
+import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
 
 class OnAccessibilityEvent(node:AccessibilityNodeInfo) extends Callable[List[(Rect, Boolean)]] {
 	final def getBounds(src:AccessibilityNodeInfo, results:ListBuffer[(Rect,Boolean)]):Unit = {

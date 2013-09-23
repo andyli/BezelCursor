@@ -23,6 +23,7 @@ class HotspotView(service:TouchService) extends View(service) {
 	var height = 10
 	val paint = new Paint()
 	val down_position = new PointF()
+	val current_position = new PointF()
 
 	paint.setStyle(Paint.Style.FILL)
 	paint.setColor(Color.WHITE)
@@ -60,15 +61,21 @@ class HotspotView(service:TouchService) extends View(service) {
 			case MotionEvent.ACTION_DOWN => //down
 				setVisibility(View.INVISIBLE)
 				down_position.set(evt.getRawX(), evt.getRawY())
-				service.mView.touch_position = down_position
+				current_position.set(evt.getRawX(), evt.getRawY())
+				service.mView.init_touch_position = down_position
+				service.mView.current_touch_position = current_position
 				service.mView.cursor_position = new PointF(evt.getRawX(), evt.getRawY())
 				//service.touchDevice.sendBeginHoverEvents(service.mView.cursor_position.x / displaySize.x, service.mView.cursor_position.y / displaySize.y)
 			case MotionEvent.ACTION_UP => //up
 				service.mView.cursor_position.set(get_cursor_position(evt.getRawX(), evt.getRawY()))
 				service.touchDevice.sendTapEvents(service.mView.cursor_position.x, service.mView.cursor_position.y)
+				service.mView.init_touch_position = null
+				service.mView.current_touch_position = null
 				service.mView.cursor_position = null
 				setVisibility(View.VISIBLE)
-			case MotionEvent.ACTION_MOVE => //move				
+			case MotionEvent.ACTION_MOVE => //move
+				current_position.set(evt.getRawX(), evt.getRawY())
+				service.mView.current_touch_position.set(evt.getRawX(), evt.getRawY())
 				service.mView.cursor_position.set(get_cursor_position(evt.getRawX(), evt.getRawY()))
 				//service.touchDevice.sendHoverEvents(service.mView.cursor_position.x / displaySize.x, service.mView.cursor_position.y / displaySize.y)
 			case _ =>

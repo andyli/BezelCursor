@@ -81,27 +81,27 @@ class TouchService extends AccessibilityService {
     
     protected var task:FutureTask[List[(Rect, Boolean)]] = null
     override def onAccessibilityEvent(event:AccessibilityEvent) = {
-    	log("AccessibilityEvent " + AccessibilityEvent.eventTypeToString(event.getEventType()))
-    	
-    	event.getEventType() match {
-    		case AccessibilityEvent.TYPE_VIEW_FOCUSED
-    		|    AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
-    		|    AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
-    		|    AccessibilityEvent.TYPE_VIEW_SCROLLED
-    		=>
-    			val src = event.getSource()
-		    	if (src != null){
-		        	src.getBoundsInScreen(mView.current_bound)
-		        	
-			    	if (task != null) {
-			    		task.cancel(true)
-			    	}
-		        	task = new FutureTask(new OnAccessibilityEvent(src))
-		        	task.run()
-		        	//mView.invalidate()
-		    	}
-    		case _ =>
-    	}
+//    	log("AccessibilityEvent " + AccessibilityEvent.eventTypeToString(event.getEventType()))
+//    	
+//    	event.getEventType() match {
+//    		case AccessibilityEvent.TYPE_VIEW_FOCUSED
+//    		|    AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+//    		|    AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+//    		|    AccessibilityEvent.TYPE_VIEW_SCROLLED
+//    		=>
+//    			val src = event.getSource()
+//		    	if (src != null){
+//		        	src.getBoundsInScreen(mView.current_bound)
+//		        	
+//			    	if (task != null) {
+//			    		task.cancel(true)
+//			    	}
+//		        	task = new FutureTask(new OnAccessibilityEvent(src))
+//		        	task.run()
+//		        	//mView.invalidate()
+//		    	}
+//    		case _ =>
+//    	}
     	
     }
 

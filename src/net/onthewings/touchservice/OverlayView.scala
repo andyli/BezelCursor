@@ -27,7 +27,7 @@ class OverlayView(service:TouchService) extends View(service) {
 	val line_paint = new Paint()
 
 	bounds_paint.setColor(Color.WHITE)
-	bounds_paint.setAlpha(50)
+	bounds_paint.setAlpha(150)
 	bounds_paint.setStrokeWidth(1)
 	bounds_paint.setStyle(Paint.Style.STROKE)
 
@@ -41,16 +41,16 @@ class OverlayView(service:TouchService) extends View(service) {
 
 	cursor_paint.setColor(Color.GREEN)
 	cursor_paint.setAntiAlias(true)
-	cursor_paint.setStrokeWidth(1)
+	cursor_paint.setStrokeWidth(4)
 	cursor_paint.setStyle(Paint.Style.STROKE)
 
 	cursor_point_paint.setColor(Color.GREEN)
 	cursor_point_paint.setAntiAlias(true)
-	cursor_point_paint.setStrokeWidth(5)
+	cursor_point_paint.setStrokeWidth(8)
 	cursor_point_paint.setStyle(Paint.Style.STROKE)
 
 	line_paint.setColor(Color.GREEN)
-	line_paint.setAlpha(50)
+	line_paint.setAlpha(150)
 	line_paint.setAntiAlias(true)
 	line_paint.setStyle(Paint.Style.FILL)
 	
@@ -63,13 +63,13 @@ class OverlayView(service:TouchService) extends View(service) {
 	import PaintAccessor.PaintProperty
 	
 	val flash_tween = Tween
-		.to(cursor_paint, PaintProperty.alpha.id, 0.5f)
+		.to(cursor_paint, PaintProperty.alpha.id, 0.8f)
 		.target(100)
 		.repeatYoyo(-1, 0)
 		.start(tweenManager)
 	
 	val flash_point_tween = Tween
-		.to(cursor_point_paint, PaintProperty.alpha.id, 0.5f)
+		.to(cursor_point_paint, PaintProperty.alpha.id, 0.8f)
 		.target(100)
 		.delay(0.25f)
 		.repeatYoyo(-1, 0)
@@ -114,13 +114,13 @@ class OverlayView(service:TouchService) extends View(service) {
 			cursor_path.close()
 			canvas.drawPath(cursor_path, line_paint)
 			
-			val cursor_RadialGradient = new RadialGradient(cursor_position.x, cursor_position.y, 25, 0x00FFFFFF, 0x3333FF33, android.graphics.Shader.TileMode.CLAMP);
+			val cursor_RadialGradient = new RadialGradient(cursor_position.x, cursor_position.y, 50, 0x00FFFFFF, 0x3333FF33, android.graphics.Shader.TileMode.CLAMP);
 			val cursor_inner_paint = new Paint()
 			cursor_inner_paint.setDither(true)
 			cursor_inner_paint.setShader(cursor_RadialGradient)
-			canvas.drawCircle(cursor_position.x, cursor_position.y, 25, cursor_inner_paint)
-			canvas.drawCircle(cursor_position.x, cursor_position.y, 25, cursor_paint)
-			canvas.drawCircle(cursor_position.x, cursor_position.y, 1, cursor_point_paint)
+			canvas.drawCircle(cursor_position.x, cursor_position.y, 40, cursor_inner_paint)
+			canvas.drawCircle(cursor_position.x, cursor_position.y, 40, cursor_paint)
+			canvas.drawCircle(cursor_position.x, cursor_position.y, 4, cursor_point_paint)
 		}
 		
 		invalidate()

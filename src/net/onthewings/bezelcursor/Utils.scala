@@ -1,4 +1,4 @@
-package net.onthewings.touchservice
+package net.onthewings.bezelcursor
 
 import android.util.Log
 

@@ -1,4 +1,4 @@
-package net.onthewings.touchservice;
+package net.onthewings.bezelcursor;
 
 import java.util.concurrent.Callable
 import java.util.concurrent.FutureTask
@@ -56,11 +56,11 @@ class OnAccessibilityEvent(node:AccessibilityNodeInfo) extends Callable[List[(Re
     }
 }
 
-class TouchService extends AccessibilityService {
+class BezelCursor extends AccessibilityService {
 
-    lazy val mView = new OverlayView(this)
-    lazy val hotspotView_l:HotspotView = new HotspotView(this)
-    lazy val hotspotView_r:HotspotView = new HotspotView(this)    
+    lazy val mView = new OverlayView(BezelCursor.this)
+    lazy val hotspotView_l:HotspotView = new HotspotView(BezelCursor.this)
+    lazy val hotspotView_r:HotspotView = new HotspotView(BezelCursor.this)    
     lazy val touchDevice = new TouchInputDevice(
 		InputDevice.getTouchDevicePath(),
 		getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager].getDefaultDisplay()
@@ -121,14 +121,14 @@ class TouchService extends AccessibilityService {
         val wm = getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager]
         
         val params = new WindowManager.LayoutParams(
-			ViewGroup.LayoutParams.WRAP_CONTENT,
-			ViewGroup.LayoutParams.WRAP_CONTENT,
-			WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
+			ViewGroup.LayoutParams.WRAP_CONTENT, 
+			ViewGroup.LayoutParams.WRAP_CONTENT, 
+			WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY, 
 			
 			WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
 			|WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
 			|WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-			|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+			|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN 
 			//|WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
 			,
 			PixelFormat.RGBA_8888

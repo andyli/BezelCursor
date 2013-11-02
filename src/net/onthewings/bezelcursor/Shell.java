@@ -1,4 +1,4 @@
-package net.onthewings.touchservice;
+package net.onthewings.bezelcursor;
 
 import java.io.*;
 import java.util.regex.Matcher;

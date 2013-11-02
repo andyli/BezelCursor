@@ -1,4 +1,4 @@
-package net.onthewings.touchservice.tween
+package net.onthewings.bezelcursor.tween
 
 import aurelienribon.tweenengine.TweenAccessor
 import android.graphics.Paint

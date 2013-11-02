@@ -1,4 +1,4 @@
-package net.onthewings.touchservice.cursor
+package net.onthewings.bezelcursor.cursor
 
 class CursorManager {
 	def onTouchBegin(t:TouchData) = {

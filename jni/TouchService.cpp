@@ -187,7 +187,7 @@ jint OpenDev(JNIEnv* env, jobject thiz, jstring devicePath) {
     return 0;
 }
 
-jint Java_net_onthewings_touchservice_AndroidEvents_PollDev( JNIEnv* env,jobject thiz, jint index ) {
+jint Java_net_onthewings_bezelcursor_AndroidEvents_PollDev( JNIEnv* env,jobject thiz, jint index ) {
 	if (index >= ioDevices.size() || ioDevices[index].ufds.fd == -1) return -1;
 	int pollres = poll(&ufds[0], ioDevices.size(), -1);
 	if(ufds[index].revents) {
@@ -250,7 +250,7 @@ static int registerNatives(JNIEnv* env)
 {
 	if (jniRegisterNativeMethods(
 		env,
-		"net/onthewings/touchservice/InputDevice$",
+		"net/onthewings/bezelcursor/InputDevice$",
 		InputDeviceMethods,
 		sizeof(InputDeviceMethods) / sizeof(InputDeviceMethods[0])
 	) != 0){

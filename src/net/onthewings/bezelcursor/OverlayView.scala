@@ -1,4 +1,4 @@
-package net.onthewings.touchservice;
+package net.onthewings.bezelcursor;
 
 import android.graphics.Canvas
 import android.graphics.Color
@@ -9,12 +9,12 @@ import android.graphics.Rect
 import android.view.View
 import aurelienribon.tweenengine.Tween
 import aurelienribon.tweenengine.TweenManager
-import net.onthewings.touchservice.tween.PaintAccessor
-import net.onthewings.touchservice.tween.PaintAccessor.PaintProperty
+import net.onthewings.bezelcursor.tween.PaintAccessor
+import net.onthewings.bezelcursor.tween.PaintAccessor.PaintProperty
 import Utils.map
 import android.graphics.RadialGradient
 
-class OverlayView(service:TouchService) extends View(service) {
+class OverlayView(service:BezelCursor) extends View(service) {
 	val current_bound = new Rect()
 	
 	val cursor_path = new Path()
@@ -75,8 +75,8 @@ class OverlayView(service:TouchService) extends View(service) {
 		.repeatYoyo(-1, 0)
 		.start(tweenManager)
 
-	def getService():TouchService = {
-		return getContext().asInstanceOf[TouchService]
+	def getService():BezelCursor = {
+		return getContext().asInstanceOf[BezelCursor]
 	}
 	
 	var lastMillis:Long = -1

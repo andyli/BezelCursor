@@ -1,4 +1,4 @@
-package net.onthewings.touchservice
+package net.onthewings.bezelcursor
 
 //import scala.collection.JavaConversions._
 import Utils._

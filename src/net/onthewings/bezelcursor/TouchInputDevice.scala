@@ -1,4 +1,4 @@
-package net.onthewings.touchservice
+package net.onthewings.bezelcursor
 
 import Utils._
 import LinuxInput._

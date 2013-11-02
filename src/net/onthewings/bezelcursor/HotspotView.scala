@@ -1,4 +1,4 @@
-package net.onthewings.touchservice
+package net.onthewings.bezelcursor
 
 import android.graphics.Canvas
 import android.graphics.Color
@@ -18,7 +18,7 @@ import android.graphics.PixelFormat
 import android.content.Context
 import android.graphics.Point
 
-class HotspotView(service:TouchService) extends View(service) {	
+class HotspotView(service:BezelCursor) extends View(service) {	
 	var width = 25
 	var height = 10
 	val paint = new Paint()
@@ -41,8 +41,8 @@ class HotspotView(service:TouchService) extends View(service) {
 	)
 	setLayoutParams(layoutParams)
 
-	def getService():TouchService = {
-		return getContext().asInstanceOf[TouchService]
+	def getService():BezelCursor = {
+		return getContext().asInstanceOf[BezelCursor]
 	}
 	
     override def onDraw(canvas:Canvas) = {

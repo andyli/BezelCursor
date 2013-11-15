@@ -52,7 +52,7 @@ object InputDevice {
     def getTouchDevicePath():String = {
     	if (Shell.isSuAvailable()) {
     		val getEvent_lp = Shell.getProcessOutput("getevent -p").split("\n")
-    		val touchEventLine = getEvent_lp.indexWhere(line => line.indexOf("%04x".format(ABS_MT_POSITION_X)) >= 0)
+    		val touchEventLine = getEvent_lp.indexWhere(line => line.indexOf("%04x".format(ABS_MT_POSITION_X)) >= 0 && line.indexOf("value") >= 0)
     		if (touchEventLine < 0) {
     			return null;
     		}

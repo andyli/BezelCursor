@@ -17,6 +17,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import android.widget.Toast
 
 class OnAccessibilityEvent(node:AccessibilityNodeInfo) extends Callable[List[(Rect, Boolean)]] {
 	final def getBounds(src:AccessibilityNodeInfo, results:ListBuffer[(Rect,Boolean)]):Unit = {
@@ -57,7 +58,7 @@ class OnAccessibilityEvent(node:AccessibilityNodeInfo) extends Callable[List[(Re
 }
 
 class BezelCursor extends AccessibilityService {
-
+	var inited = false
     lazy val mView = new OverlayView(BezelCursor.this)
     lazy val hotspotView_l:HotspotView = new HotspotView(BezelCursor.this)
     lazy val hotspotView_r:HotspotView = new HotspotView(BezelCursor.this)    
@@ -113,10 +114,20 @@ class BezelCursor extends AccessibilityService {
     	log("onServiceConnected")
     }
     
-    override def onCreate() = {
+    override def onCreate():Unit = {
         super.onCreate()
         
-        log("onCreate")
+        init()
+    }
+    
+    def init():Unit = {
+    	if (!Shell.isSuAvailable()) {
+        	log("su not available")
+        	
+        	Toast.makeText(getApplicationContext(), "Failed to get root access...\nPlease restart BezelCursor...", Toast.LENGTH_LONG).show()
+        	
+        	return
+        }
 
         val wm = getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager]
         
@@ -149,12 +160,16 @@ class BezelCursor extends AccessibilityService {
         
         val touchDeviceOpenSuccess = touchDevice.open()
         log("touchDeviceOpenSuccess " + touchDeviceOpenSuccess)
+        
+        inited = true
     }
     
     override def onDestroy() = {
-    	val wm = getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager]
-        wm.removeView(mView)
-        wm.removeView(hotspotView_l)
-        wm.removeView(hotspotView_r)
+    	if (inited) {
+    		val wm = getSystemService(Context.WINDOW_SERVICE).asInstanceOf[WindowManager]
+	    	wm.removeView(mView)
+	    	wm.removeView(hotspotView_l)
+	    	wm.removeView(hotspotView_r)
+    	}
     }
 }

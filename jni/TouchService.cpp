@@ -250,7 +250,7 @@ static int registerNatives(JNIEnv* env)
 {
 	if (jniRegisterNativeMethods(
 		env,
-		"net/onthewings/bezelcursor/InputDevice$",
+		"net/onthewings/bezelcursor/InputDevice",
 		InputDeviceMethods,
 		sizeof(InputDeviceMethods) / sizeof(InputDeviceMethods[0])
 	) != 0){

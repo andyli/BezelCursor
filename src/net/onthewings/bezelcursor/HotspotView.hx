@@ -8,6 +8,8 @@ import android.content.Context;
 import android.view.ViewGroup.ViewGroup_LayoutParams.*;
 import android.view.WindowManager.WindowManager_LayoutParams.*;
 
+using Std;
+
 @:nativeGen
 class HotspotView extends View {	
 	var service:BezelCursor;
@@ -26,9 +28,11 @@ class HotspotView extends View {
 		paint.setColor(Color.WHITE);
 		paint.setAlpha(10);
 
+		var wm:WindowManager = service.getSystemService(Context.WINDOW_SERVICE);
+
 		layoutParams = new WindowManager.WindowManager_LayoutParams(
 			width,
-			WRAP_CONTENT,
+			(wm.getDefaultDisplay().getHeight() * 0.5).int(),
 			TYPE_SYSTEM_ALERT,
 			FLAG_NOT_FOCUSABLE | FLAG_LAYOUT_IN_SCREEN,
 			PixelFormat.RGBA_8888

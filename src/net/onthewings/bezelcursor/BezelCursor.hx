@@ -103,11 +103,11 @@ class BezelCursor extends AccessibilityService {
         wm.addView(mView, params);
         
         var params_hotspot_l:android.view.WindowManager.WindowManager_LayoutParams = cast hotspotView_l.getLayoutParams();
-        params_hotspot_l.gravity = Gravity.LEFT;
+        params_hotspot_l.gravity = Gravity.BOTTOM | Gravity.LEFT;
         wm.addView(hotspotView_l, params_hotspot_l);
         
         var params_hotspot_r:android.view.WindowManager.WindowManager_LayoutParams = cast hotspotView_r.getLayoutParams();
-        params_hotspot_r.gravity = Gravity.RIGHT;
+        params_hotspot_r.gravity = Gravity.BOTTOM | Gravity.RIGHT;
         wm.addView(hotspotView_r, params_hotspot_r);
         
         

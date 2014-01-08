@@ -6,24 +6,42 @@ import net.onthewings.bezelcursor.LinuxInput.*;
 using Lambda;
 using StringTools;
 using net.onthewings.bezelcursor.Utils;
+using hxLINQ.LINQ;
+import net.onthewings.bezelcursor.InputDevice.*;
 
+@:extern
+@:nativeGen
+class InputDevice {
+	static public function getDebugEnabled():Bool return throw "jni not loaded";
+	static public function setDebugEnabled(enable:Bool):Bool return throw "jni not loaded";
+	static public function OpenDev(devicePath:String):Int return throw "jni not loaded";
+	static public function SendEvent(devicePath:String, _type:Int, code:Int, value:Int):Int return throw "jni not loaded";
+	static public function Open(devicePath:String, forceOpen:Bool = true):Bool return false;
+	static public function getTouchDevicePath():String return null;
+	public var path(default, null):String;
+	public function new(path:String):Void {}
+	var getevent_p:Array<String>; 
+	var name_re = ~/\s*name:\s*"(.*)"\s*/;
+	var detail_re = ~/\s*([0-9a-f]+)\s+:?\s*value\s+([0-9]+),?\s+min\s+([0-9]+),?\s+max\s+([0-9]+),.+/;
+	var name:String;
+	public function open():Bool return false;
+	public function sendEvent(eventType:Int, event:Int, value:Int):Void {}
+}
+
+
+@:native("net.onthewings.bezelcursor.InputDevice")
+@:nativeGen
 @:classCode('
 	native static boolean getDebugEnabled();
 	native static boolean setDebugEnabled(boolean enable);
 	native static int OpenDev(String devicePath);
 	native static int SendEvent(String devicePath, int _type, int code, int value);
 ')
-class InputDevice {
+class InputDeviceJNI {
 
 	static function __init__():Void {
 		java.lang.System.loadLibrary("TouchService");
 	}
-	
-	
-	@:extern static function getDebugEnabled():Bool return throw "jni not loaded";
-	@:extern static function setDebugEnabled(enable:Bool):Bool return throw "jni not loaded";
-	@:extern static function OpenDev(devicePath:String):Int return throw "jni not loaded";
-	@:extern static function SendEvent(devicePath:String, _type:Int, code:Int, value:Int):Int return throw "jni not loaded";
 	
 	
 //	@native def RemoveDev(devid:Int):Int
@@ -67,8 +85,11 @@ class InputDevice {
     		if (touchEventLine.length <= 0) {
     			return null;
     		}
-    		var deviceLine = getEvent_lp.lastIndexOf(function(line) return line.indexOf("device") >= 0, getEvent_lp.indexOf(touchEventLine[0]));
-    		var path = getEvent_lp[deviceLine].substring(getEvent_lp[deviceLine].indexOf(":")+1).trim();
+    		var deviceLine = getEvent_lp.linq()
+    			.select(function(line,i) return {line:line, i:i})
+    			.last(function(l) return l.i < getEvent_lp.indexOf(touchEventLine[0]) && l.line.indexOf("device") >= 0)
+    			.line;
+    		var path = deviceLine.substring(deviceLine.indexOf(":")+1).trim();
     		return path;
     	}
     	

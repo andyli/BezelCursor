@@ -10,6 +10,7 @@ import java.lang.System;
 using Std;
 using haxe.Int64;
 
+@:nativeGen
 class OverlayView extends View {
 	var service:BezelCursor;
 	var current_bound = new Rect();
@@ -31,30 +32,30 @@ class OverlayView extends View {
 		bounds_paint.setColor(Color.WHITE);
 		bounds_paint.setAlpha(150);
 		bounds_paint.setStrokeWidth(1);
-		bounds_paint.setStyle(FILL());
+		bounds_paint.setStyle(untyped __java__("android.graphics.Paint.Style.FILL"));
 
 		clickable_bounds_paint.setColor(Color.YELLOW);
 		clickable_bounds_paint.setStrokeWidth(2);
-		clickable_bounds_paint.setStyle(STROKE());
+		clickable_bounds_paint.setStyle(untyped __java__("android.graphics.Paint.Style.STROKE"));
 		
 		current_bound_paint.setColor(Color.GREEN);
 		current_bound_paint.setStrokeWidth(2);
-		current_bound_paint.setStyle(STROKE());
+		current_bound_paint.setStyle(untyped __java__("android.graphics.Paint.Style.STROKE"));
 
 		cursor_paint.setColor(Color.GREEN);
 		cursor_paint.setAntiAlias(true);
 		cursor_paint.setStrokeWidth(4);
-		cursor_paint.setStyle(STROKE());
+		cursor_paint.setStyle(untyped __java__("android.graphics.Paint.Style.STROKE"));
 
 		cursor_point_paint.setColor(Color.GREEN);
 		cursor_point_paint.setAntiAlias(true);
 		cursor_point_paint.setStrokeWidth(8);
-		cursor_point_paint.setStyle(STROKE());
+		cursor_point_paint.setStyle(untyped __java__("android.graphics.Paint.Style.STROKE"));
 
 		line_paint.setColor(Color.GREEN);
 		line_paint.setAlpha(150);
 		line_paint.setAntiAlias(true);
-		line_paint.setStyle(FILL());
+		line_paint.setStyle(untyped __java__("android.graphics.Paint.Style.FILL"));
 
 		PaintAccessor.register();
 
@@ -121,7 +122,7 @@ class OverlayView extends View {
 			cursor_path.close();
 			canvas.drawPath(cursor_path, line_paint);
 			
-			var cursor_RadialGradient = new RadialGradient(cursor_position.x, cursor_position.y, 50, 0x00FFFFFF, 0x3333FF33, CLAMP());
+			var cursor_RadialGradient = new RadialGradient(cursor_position.x, cursor_position.y, 50, 0x00FFFFFF, 0x3333FF33, untyped __java__("android.graphics.Shader.TileMode.CLAMP"));
 			var cursor_inner_paint = new Paint();
 			cursor_inner_paint.setDither(true);
 			cursor_inner_paint.setShader(cursor_RadialGradient);

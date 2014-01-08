@@ -10,6 +10,7 @@ using Std;
 using Lambda;
 using StringTools;
 
+@:nativeGen
 class TouchInputDevice extends net.onthewings.bezelcursor.InputDevice {
 	var display:Display;
 
@@ -18,7 +19,7 @@ class TouchInputDevice extends net.onthewings.bezelcursor.InputDevice {
 		this.display = display;
 
 		isProtocolB = getevent_p.exists(function(line) return line.indexOf(ABS_MT_SLOT.hex(4).toLowerCase()) >= 0);
-		log(if (isProtocolB) path + " is B" else path + " is A?");
+		log(if (isProtocolB) path + " is B" else path + " is A");
 
 		var detail = getevent_p.filter(function(line) return line.indexOf(ABS_MT_POSITION_X.hex(4).toLowerCase()) >= 0)[0];
 		if (detail_re.match(detail)) {

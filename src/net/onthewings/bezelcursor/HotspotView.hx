@@ -8,6 +8,7 @@ import android.content.Context;
 import android.view.ViewGroup.ViewGroup_LayoutParams.*;
 import android.view.WindowManager.WindowManager_LayoutParams.*;
 
+@:nativeGen
 class HotspotView extends View {	
 	var service:BezelCursor;
 	var width = 25;
@@ -21,7 +22,7 @@ class HotspotView extends View {
 		
 		this.service = service;
 
-		paint.setStyle(FILL());
+		paint.setStyle(untyped __java__("android.graphics.Paint.Style.FILL"));
 		paint.setColor(Color.WHITE);
 		paint.setAlpha(10);
 

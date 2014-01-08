@@ -159,6 +159,7 @@ class Shell {
   }
 }
 
+@:nativeGen
 class InputStreamHandler extends Thread {
   private var stream:InputStream;
   private var sink:Bool;

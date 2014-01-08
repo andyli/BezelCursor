@@ -1,6 +1,7 @@
 net.onthewings.bezelcursor.BezelCursor
--java bin/haxe
+-java bin
 -cp src
+-lib hxLINQ
 -java-lib /usr/local/opt/android-sdk/platforms/android-15/android.jar
 -java-lib libs/tween-engine-api.jar
 -D no-compilation

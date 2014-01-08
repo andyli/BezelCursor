@@ -3,12 +3,12 @@ package net.onthewings.bezelcursor;
 import android.graphics.*;
 import android.view.View;
 import aurelienribon.tweenengine.*;
-import net.onthewings.bezelcursor.tween.PaintAccessor;
 import net.onthewings.bezelcursor.Utils.*;
 import java.lang.System;
 
 using Std;
 using haxe.Int64;
+using motion.Actuate;
 
 @:nativeGen
 class OverlayView extends View {
@@ -57,20 +57,35 @@ class OverlayView extends View {
 		line_paint.setAntiAlias(true);
 		line_paint.setStyle(untyped __java__("android.graphics.Paint.Style.FILL"));
 
-		PaintAccessor.register();
+		var prop = {
+			alpha: cursor_paint.getAlpha(),
+			extra: "123"
+		};
+		prop
+			.tween(0.6, {
+				alpha: 100.0
+			})
+			.onUpdate(setCursorPaintAlpha, [cursor_paint, prop])
+			.repeat()
+			.reflect()
+			.ease(motion.easing.Sine.easeInOut);
 
-		flash_tween = Tween
-			.to(cursor_paint, PaintProperty.alpha, 0.8)
-			.target(100)
-			.repeatYoyo(-1, 0)
-			.start(tweenManager);
+		var prop = {
+			alpha: cursor_point_paint.getAlpha()
+		};
+		prop
+			.tween(0.6, {
+				alpha:100.0
+			})
+			.onUpdate(setCursorPaintAlpha, [cursor_point_paint, prop])
+			.delay(0.1)
+			.repeat()
+			.reflect()
+			.ease(motion.easing.Sine.easeInOut);
+	}
 
-		flash_point_tween = Tween
-			.to(cursor_point_paint, PaintProperty.alpha, 0.8)
-			.target(100)
-			.delay(0.25)
-			.repeatYoyo(-1, 0)
-			.start(tweenManager);
+	function setCursorPaintAlpha(p:Paint, _prop:Dynamic):Void {
+		p.setAlpha(Std.int(_prop.alpha));
 	}
 
 	
@@ -78,10 +93,6 @@ class OverlayView extends View {
 	public var init_touch_position:PointF = null;
 	public var current_touch_position:PointF = null;
 	public var cursor_position:PointF = null;
-	
-	var tweenManager = new TweenManager();
-	var flash_tween:Tween;
-	var flash_point_tween:Tween;
 
 	function getService():BezelCursor {
 		return cast getContext();
@@ -93,7 +104,6 @@ class OverlayView extends View {
 		if (lastMillis.isNeg()) {
 			lastMillis = currentMillis;
 		}
-		tweenManager.update((currentMillis.sub(lastMillis)).toInt() / 1000);
 		
 		if (cursor_position != null) {
 			var bounds = [];//TODO getService().getBounds();

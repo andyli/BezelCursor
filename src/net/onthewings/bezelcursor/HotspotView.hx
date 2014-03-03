@@ -24,7 +24,7 @@ class HotspotView extends View {
 		
 		this.service = service;
 
-		paint.setStyle(untyped __java__("android.graphics.Paint.Style.FILL"));
+		paint.setStyle(FILL);
 		paint.setColor(Color.WHITE);
 		paint.setAlpha(10);
 

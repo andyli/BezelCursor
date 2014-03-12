@@ -47,7 +47,7 @@ class TouchInputDevice extends net.onthewings.bezelcursor.InputDevice {
 			displaySize.set(display.getWidth(), display.getHeight());
 		}
 		
-		log("display " + displaySize.x + " " + displaySize.y + " " + display.getRotation());
+		//log("display " + displaySize.x + " " + displaySize.y + " " + display.getRotation());
 		return switch(display.getRotation()) {
 			case Surface.ROTATION_0:
 				new Point(

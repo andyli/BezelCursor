@@ -1,24 +1,49 @@
 package net.onthewings.bezelcursor;
 
+import android.content.*;
+import android.content.res.Configuration.*;
 import android.graphics.*;
 import android.view.*;
-import java.util.LinkedList;
-import net.onthewings.bezelcursor.Utils.*;
 import android.content.Context;
 import android.view.ViewGroup.ViewGroup_LayoutParams.*;
 import android.view.WindowManager.WindowManager_LayoutParams.*;
+import net.onthewings.bezelcursor.Utils.*;
 
 using Std;
 
-class HotspotView extends View {	
-	var service:BezelCursor;
+enum HotspotViewSide {
+	Left;
+	Right;
+}
+
+class HotspotViewBroadcastReceiver extends BroadcastReceiver {
+	var view:HotspotView;
+
+	public function new(view:HotspotView):Void {
+		super();
+		this.view = view;
+	}
+
+	@:overload function onReceive(context:Context, myIntent:Intent):Void {
+		if (myIntent.getAction() == Intent.ACTION_CONFIGURATION_CHANGED) {
+			var wm:WindowManager = view.service.getSystemService(Context.WINDOW_SERVICE);
+			wm.removeView(view);
+			view.addToWindow();
+		}
+	}
+}
+
+class HotspotView extends View {
+	public var side(default, null):HotspotViewSide;
+	public var service(default, null):BezelCursor;
 	var width = 25;
 	var height = 10;
 	var paint = new Paint();
 	var down_position = new PointF();
 	var current_position = new PointF();
+	var broadcastReceiver:HotspotViewBroadcastReceiver;
 
-	public function new(service:BezelCursor):Void {
+	public function new(service:BezelCursor, side:HotspotViewSide):Void {
 		super(service);
 		
 		this.service = service;
@@ -27,9 +52,18 @@ class HotspotView extends View {
 		paint.setColor(Color.WHITE);
 		paint.setAlpha(10);
 
-		var wm:WindowManager = service.getSystemService(Context.WINDOW_SERVICE);
+		this.side = side;
 
-		layoutParams = new WindowManager.WindowManager_LayoutParams(
+		var filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+        service.registerReceiver(broadcastReceiver = new HotspotViewBroadcastReceiver(this), filter);
+
+		addToWindow();
+	}
+
+	public function addToWindow():Void {
+		var wm:WindowManager = service.getSystemService(Context.WINDOW_SERVICE);
+		var layoutParams = new WindowManager.WindowManager_LayoutParams(
 			width,
 			(wm.getDefaultDisplay().getHeight() * 0.5).int(),
 			TYPE_SYSTEM_ALERT,
@@ -37,18 +71,19 @@ class HotspotView extends View {
 			PixelFormat.RGBA_8888
 		);
 
-		setLayoutParams(layoutParams);
-	}
-	
-	private var layoutParams:WindowManager.WindowManager_LayoutParams;
+		switch (side) {
+			case Left:
+				layoutParams.gravity = Gravity.BOTTOM | Gravity.LEFT;
+			case Right:
+				layoutParams.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+		}
 
-	function getService():BezelCursor {
-		return cast getContext();
+		wm.addView(this, layoutParams);
 	}
 	
-    @:overload function onDraw(canvas:Canvas):Void {
-        canvas.drawRect(0, 0, width, getHeight(), paint);
-    }
+	@:overload function onDraw(canvas:Canvas):Void {
+		canvas.drawRect(0, 0, width, getHeight(), paint);
+	}
 	
 	@:overload function onTouchEvent(evt:MotionEvent):Bool {
 		//log("onTouchEvent " + evt.getRawX() + "," + evt.getRawY() + "," + evt.getAction())

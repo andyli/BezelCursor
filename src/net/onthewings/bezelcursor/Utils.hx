@@ -3,8 +3,8 @@ package net.onthewings.bezelcursor;
 import android.util.Log;
 
 class Utils {
-	static public function log(msg:String):Void {
-		Log.d("BezelCursor", msg);
+	static public function log(msg:String, ?pos:haxe.PosInfos):Void {
+		Log.d("BezelCursor", '${pos.fileName} ${pos.lineNumber}: $msg');
 	}
 	
 	static public function map(value:Float, min1:Float, max1:Float, min2:Float, max2:Float):Float {

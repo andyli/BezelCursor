@@ -18,15 +18,8 @@ class BezelCursor extends AccessibilityService {
         return mView != null ? mView : mView = new OverlayView(this);
     }
 
-    public var hotspotView_l(get, null):HotspotView;
-    function get_hotspotView_l():HotspotView {
-        return hotspotView_l != null ? hotspotView_l : hotspotView_l = new HotspotView(this);
-    }
-
-    public var hotspotView_r(get, null):HotspotView;
-    function get_hotspotView_r():HotspotView {
-        return hotspotView_r != null ? hotspotView_r : hotspotView_r = new HotspotView(this);
-    }
+    public var hotspotView_l:HotspotView;
+    public var hotspotView_r:HotspotView;
 
     public var touchDevice(get, null):TouchInputDevice;
     function get_touchDevice():TouchInputDevice {
@@ -101,15 +94,8 @@ class BezelCursor extends AccessibilityService {
         );
         params.gravity = Gravity.FILL;
         wm.addView(mView, params);
-        
-        var params_hotspot_l:android.view.WindowManager.WindowManager_LayoutParams = cast hotspotView_l.getLayoutParams();
-        params_hotspot_l.gravity = Gravity.BOTTOM | Gravity.LEFT;
-        wm.addView(hotspotView_l, params_hotspot_l);
-        
-        var params_hotspot_r:android.view.WindowManager.WindowManager_LayoutParams = cast hotspotView_r.getLayoutParams();
-        params_hotspot_r.gravity = Gravity.BOTTOM | Gravity.RIGHT;
-        wm.addView(hotspotView_r, params_hotspot_r);
-        
+        hotspotView_l = new HotspotView(this, Left);
+        hotspotView_r = new HotspotView(this, Right);
         
         log("addView");
         

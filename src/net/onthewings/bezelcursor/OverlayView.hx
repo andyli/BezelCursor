@@ -10,7 +10,6 @@ using Std;
 using haxe.Int64;
 using motion.Actuate;
 
-@:nativeGen
 class OverlayView extends View {
 	var service:BezelCursor;
 	var current_bound = new Rect();
@@ -93,10 +92,6 @@ class OverlayView extends View {
 	public var init_touch_position:PointF = null;
 	public var current_touch_position:PointF = null;
 	public var cursor_position:PointF = null;
-
-	function getService():BezelCursor {
-		return cast getContext();
-	}
 	
 	var lastMillis:Int64 = Int64.ofInt(-1);
 	@:overload function onDraw(canvas:Canvas):Void {

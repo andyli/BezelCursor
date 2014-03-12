@@ -2,9 +2,9 @@ package net.onthewings.bezelcursor;
 
 import android.graphics.*;
 import android.view.View;
-import aurelienribon.tweenengine.*;
 import net.onthewings.bezelcursor.Utils.*;
 import java.lang.System;
+import motion.actuators.GenericActuator;
 
 using Std;
 using haxe.Int64;
@@ -22,6 +22,9 @@ class OverlayView extends View {
 	var cursor_paint = new Paint();
 	var cursor_point_paint = new Paint();
 	var line_paint = new Paint();
+
+	var cursor_paint_tween:IGenericActuator;
+	var cursor_point_paint_tween:IGenericActuator;
 
 	public function new(service:BezelCursor):Void {
 		super(service);
@@ -60,7 +63,7 @@ class OverlayView extends View {
 			alpha: cursor_paint.getAlpha(),
 			extra: "123"
 		};
-		prop
+		cursor_paint_tween = prop
 			.tween(0.6, {
 				alpha: 100.0
 			})
@@ -72,7 +75,7 @@ class OverlayView extends View {
 		var prop = {
 			alpha: cursor_point_paint.getAlpha()
 		};
-		prop
+		cursor_point_paint_tween = prop
 			.tween(0.6, {
 				alpha:100.0
 			})
@@ -91,7 +94,17 @@ class OverlayView extends View {
 	
 	public var init_touch_position:PointF = null;
 	public var current_touch_position:PointF = null;
-	public var cursor_position:PointF = null;
+	public var cursor_position(default, set):PointF = null;
+	function set_cursor_position(v) {
+		if (v != null) {
+			cursor_paint_tween.resume();
+			cursor_point_paint_tween.resume();
+		} else {
+			cursor_paint_tween.pause();
+			cursor_point_paint_tween.pause();
+		}
+		return cursor_position = v;
+	}
 	
 	var lastMillis:Int64 = Int64.ofInt(-1);
 	@:overload function onDraw(canvas:Canvas):Void {

@@ -10,7 +10,6 @@ using Std;
 using Lambda;
 using StringTools;
 
-@:nativeGen
 class TouchInputDevice extends net.onthewings.bezelcursor.InputDevice {
 	var display:Display;
 

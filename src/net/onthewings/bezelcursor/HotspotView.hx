@@ -10,7 +10,6 @@ import android.view.WindowManager.WindowManager_LayoutParams.*;
 
 using Std;
 
-@:nativeGen
 class HotspotView extends View {	
 	var service:BezelCursor;
 	var width = 25;

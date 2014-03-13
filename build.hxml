@@ -2,6 +2,6 @@ net.onthewings.bezelcursor.BezelCursor
 -java bin
 -cp src
 -lib hxLINQ
--lib actuate
+-lib tweenx
 -java-lib /usr/local/opt/android-sdk/platforms/android-15/android.jar
 -D no-compilation

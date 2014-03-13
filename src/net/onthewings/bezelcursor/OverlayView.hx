@@ -4,11 +4,10 @@ import android.graphics.*;
 import android.view.View;
 import net.onthewings.bezelcursor.Utils.*;
 import java.lang.System;
-import motion.actuators.GenericActuator;
+import tweenx909.*;
 
 using Std;
 using haxe.Int64;
-using motion.Actuate;
 
 class OverlayView extends View {
 	var service:BezelCursor;
@@ -23,8 +22,8 @@ class OverlayView extends View {
 	var cursor_point_paint = new Paint();
 	var line_paint = new Paint();
 
-	var cursor_paint_tween:IGenericActuator;
-	var cursor_point_paint_tween:IGenericActuator;
+	var cursor_paint_tween:TweenX;
+	var cursor_point_paint_tween:TweenX;
 
 	public function new(service:BezelCursor):Void {
 		super(service);
@@ -59,34 +58,33 @@ class OverlayView extends View {
 		line_paint.setAntiAlias(true);
 		line_paint.setStyle(FILL);
 
-		var prop = {
-			alpha: cursor_paint.getAlpha(),
-			extra: "123"
-		};
-		cursor_paint_tween = prop
-			.tween(0.6, {
-				alpha: 100.0
-			})
-			.onUpdate(setCursorPaintAlpha, [cursor_paint, prop])
-			.repeat()
-			.reflect()
-			.ease(motion.easing.Sine.easeInOut);
+		TweenX.updateMode = MANUAL;
 
-		var prop = {
+		var prop:{alpha:Float} = {
+			alpha: cursor_paint.getAlpha()
+		};
+		cursor_paint_tween = TweenX
+			.to(prop, {
+				alpha: 100.0
+			}, 0.6)
+			.onUpdate(setCursorPaintAlpha.bind(cursor_paint, prop))
+			.repeat(0)
+			.yoyo();
+
+		var prop:{alpha:Float} = {
 			alpha: cursor_point_paint.getAlpha()
 		};
-		cursor_point_paint_tween = prop
-			.tween(0.6, {
+		cursor_point_paint_tween = TweenX
+			.to(prop, {
 				alpha:100.0
-			})
-			.onUpdate(setCursorPaintAlpha, [cursor_point_paint, prop])
+			}, 0.6)
+			.onUpdate(setCursorPaintAlpha.bind(cursor_point_paint, prop))
 			.delay(0.1)
-			.repeat()
-			.reflect()
-			.ease(motion.easing.Sine.easeInOut);
+			.repeat(0)
+			.yoyo();
 	}
 
-	function setCursorPaintAlpha(p:Paint, _prop:Dynamic):Void {
+	function setCursorPaintAlpha(p:Paint, _prop:{alpha:Float}):Void {
 		p.setAlpha(Std.int(_prop.alpha));
 	}
 
@@ -96,13 +94,6 @@ class OverlayView extends View {
 	public var current_touch_position:PointF = null;
 	public var cursor_position(default, set):PointF = null;
 	function set_cursor_position(v) {
-		if (v != null) {
-			cursor_paint_tween.resume();
-			cursor_point_paint_tween.resume();
-		} else {
-			cursor_paint_tween.pause();
-			cursor_point_paint_tween.pause();
-		}
 		return cursor_position = v;
 	}
 	
@@ -114,6 +105,8 @@ class OverlayView extends View {
 		}
 		
 		if (cursor_position != null) {
+			TweenX.manualUpdate(currentMillis.sub(lastMillis).toInt() / 1000);
+
 			var bounds = [];//TODO getService().getBounds();
 			
 			for (bound in bounds) {

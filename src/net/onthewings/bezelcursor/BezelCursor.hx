@@ -10,6 +10,7 @@ import android.view.accessibility.*;
 import android.widget.Toast;
 import android.view.ViewGroup.ViewGroup_LayoutParams.*;
 import android.view.WindowManager.WindowManager_LayoutParams.*;
+import com.crittercism.app.Crittercism;
 
 class BezelCursor extends AccessibilityService {
 	var inited:Bool = false;
@@ -69,6 +70,8 @@ class BezelCursor extends AccessibilityService {
     }
     
     function init():Void {
+        Crittercism.initialize(this, "5065d991067e7c109c00000b");
+
     	if (!Shell.isSuAvailable()) {
         	log("su not available");
         	

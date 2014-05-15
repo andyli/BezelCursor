@@ -1,3 +1,7 @@
+libTouchService.so
+TouchService.o*
+keystore
+
 ## MacOSX
 
 .DS_Store
@@ -44,4 +48,3 @@ proguard/
 
 .cache
 proguard_cache
-scala_library.min.jar

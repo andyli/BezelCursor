@@ -9,6 +9,7 @@ import tweenx909.*;
 using Std;
 using haxe.Int64;
 
+@:nativeGen
 class OverlayView extends View {
 	var service:BezelCursor;
 	var current_bound = new Rect();

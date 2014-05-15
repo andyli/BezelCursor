@@ -1,3 +1,5 @@
+src
+hxjava_build.txt
 libTouchService.so
 TouchService.o*
 keystore

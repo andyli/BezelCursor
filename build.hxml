@@ -1,6 +1,6 @@
 net.onthewings.bezelcursor.BezelCursor
--java bin
--cp src
+-java .
+-cp hx
 -lib hxLINQ
 -lib tweenx
 -java-lib /usr/local/opt/android-sdk/platforms/android-15/android.jar

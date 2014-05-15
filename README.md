@@ -1,5 +1,7 @@
 # BezelCursor
 
+**warning: root is required**
+
 BezelCursor lets you access the whole screen with just the thumb of your holding hand, no matter how large the screen is. With a fixed, comfortable grip of a mobile touch device, you can use BezelCursor to easily and quickly trigger a button located anywhere on the screen, using a single fluid action. Your other hand will be free, to write note, to hold a bag, to do whatever you want.
 
 ## How to activate
@@ -15,7 +17,7 @@ BezelCursor lets you access the whole screen with just the thumb of your holding
 
 ## Does BezelCursor record any personal info?
 
-No. It is implemented as an accessiblity service which __could__ record device usage, but BezelCursor **does not** record any personal data.
+No. It is implemented as an accessiblity service which _could_ record device usage, but BezelCursor **does not** record any personal data.
 Internet access is required only for sending anonymous crash report. 
 
 The source code of BezelCursor can be found at the following web page, such that you can review or even compile your own version of BezelCursor: https://github.com/andyli/BezelCursor

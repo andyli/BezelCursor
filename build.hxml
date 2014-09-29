@@ -4,5 +4,5 @@ net.onthewings.bezelcursor.BezelCursor
 -lib hxLINQ
 -lib tweenx
 -java-lib /usr/local/opt/android-sdk/platforms/android-15/android.jar
--java-lib libs/crittercism_v4_5_1_sdkonly.jar
+-java-lib libs/crittercism_v4_5_4_sdkonly.jar
 -D no-compilation

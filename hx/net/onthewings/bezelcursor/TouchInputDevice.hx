@@ -17,20 +17,21 @@ class TouchInputDevice extends net.onthewings.bezelcursor.InputDevice {
 		super(path);
 		this.display = display;
 
-		isProtocolB = getevent_p.exists(function(line) return line.indexOf(ABS_MT_SLOT.hex(4).toLowerCase()) >= 0);
+		isProtocolB = try {
+			detail(ABS_MT_SLOT);
+			true;
+		} catch (e:Dynamic) {
+			false;
+		}
 		log(if (isProtocolB) path + " is B" else path + " is A");
 
-		var detail = getevent_p.filter(function(line) return line.indexOf(ABS_MT_POSITION_X.hex(4).toLowerCase()) >= 0)[0];
-		if (detail_re.match(detail)) {
-			x_min = detail_re.matched(3).parseInt();
-			x_max = detail_re.matched(4).parseInt();
-		} else throw "parsing error: " + detail;
+		var detail_x = detail(ABS_MT_POSITION_X);
+		x_min = detail_x.min;
+		x_max = detail_x.max;
 
-		var detail = getevent_p.filter(function(line) return line.indexOf(ABS_MT_POSITION_Y.hex(4).toLowerCase()) >= 0)[0];
-		if (detail_re.match(detail)) {
-			y_min = detail_re.matched(3).parseInt();
-			y_max = detail_re.matched(4).parseInt();
-		} else throw "parsing error: " + detail;
+		var detail_y = detail(ABS_MT_POSITION_Y);
+		y_min = detail_y.min;
+		y_max = detail_y.max;
 	}
 
 	public var isProtocolB(default, null):Bool;
@@ -39,9 +40,13 @@ class TouchInputDevice extends net.onthewings.bezelcursor.InputDevice {
 	public var y_min(default, null):Int;
 	public var y_max(default, null):Int;
 	
+	/*
+	@TargetApi(13)
+	@SuppressWarnings("deprecation")
+	*/
 	public function displayToDevice(x:Float, y:Float):Point {
 		var displaySize = new Point();
-		if (Build_VERSION.SDK_INT >= 13) {
+		if ((untyped __java__("android.os.Build.VERSION.SDK_INT")) >= 13) {
 			display.getSize(displaySize);
 		} else {
 			displaySize.set(display.getWidth(), display.getHeight());

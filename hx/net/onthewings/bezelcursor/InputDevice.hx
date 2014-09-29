@@ -3,6 +3,7 @@ package net.onthewings.bezelcursor;
 import net.onthewings.bezelcursor.Utils.*;
 import net.onthewings.bezelcursor.LinuxInput.*;
 
+using Std;
 using Lambda;
 using StringTools;
 using net.onthewings.bezelcursor.Utils;
@@ -78,7 +79,19 @@ class InputDevice {
 
 	var getevent_p:Array<String>; 
 	var name_re = ~/\s*name:\s*"(.*)"\s*/;
-	var detail_re = ~/\s*([0-9a-f]+)\s+:?\s*value\s+([0-9]+),?\s+min\s+([0-9]+),?\s+max\s+([0-9]+),.+/;
+	function detail(evt:Int) {
+		var re = new EReg('\\s*(${evt.hex(4).toLowerCase()})\\s+:?\\s*value\\s+([0-9]+),?\\s+min\\s+([0-9]+),?\\s+max\\s+([0-9]+),.+', "i");
+		for (line in getevent_p) {
+			if (re.match(line)) {
+				return {
+					value: re.matched(2).parseInt(),
+					min: re.matched(3).parseInt(),
+					max: re.matched(4).parseInt(),
+				}
+			}
+		}
+		return throw 'failed to find the line of $evt in:\n' + getevent_p;
+	}
 	
 	var name:String;
 	

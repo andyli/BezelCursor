@@ -42,6 +42,7 @@ class HotspotView extends View {
 	var down_position = new PointF();
 	var current_position = new PointF();
 	var broadcastReceiver:HotspotViewBroadcastReceiver;
+	var filter:IntentFilter;
 
 	public function new(service:BezelCursor, side:HotspotViewSide):Void {
 		super(service);
@@ -54,11 +55,21 @@ class HotspotView extends View {
 
 		this.side = side;
 
-		var filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-        service.registerReceiver(broadcastReceiver = new HotspotViewBroadcastReceiver(this), filter);
+		filter = new IntentFilter();
+		filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+		broadcastReceiver = new HotspotViewBroadcastReceiver(this);
 
 		addToWindow();
+	}
+
+	@:overload public function onAttachedToWindow():Void {
+		super.onAttachedToWindow();
+		service.registerReceiver(broadcastReceiver, filter);
+	}
+
+	@:overload public function onDetachedFromWindow():Void {
+		super.onDetachedFromWindow();
+		service.unregisterReceiver(broadcastReceiver);
 	}
 
 	public function addToWindow():Void {

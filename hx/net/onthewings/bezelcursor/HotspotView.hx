@@ -68,8 +68,9 @@ class HotspotView extends View {
 	}
 
 	@:overload public function onDetachedFromWindow():Void {
-		super.onDetachedFromWindow();
+		cancel();
 		service.unregisterReceiver(broadcastReceiver);
+		super.onDetachedFromWindow();
 	}
 
 	public function addToWindow():Void {
@@ -126,14 +127,18 @@ class HotspotView extends View {
 				service.mView.cursor_position.set(get_cursor_position(evt.getRawX(), evt.getRawY()));
 				//service.touchDevice.sendHoverEvents(service.mView.cursor_position.x / displaySize.x, service.mView.cursor_position.y / displaySize.y);
 			case MotionEvent.ACTION_CANCEL:
-				service.mView.init_touch_position = null;
-				service.mView.current_touch_position = null;
-				service.mView.cursor_position = null;
-				setVisibility(View.VISIBLE);
+				cancel();
 			case _:
 				//log("event action " + evt.getAction())
 		}
 		service.mView.invalidate();
 		return false;
+	}
+
+	public function cancel():Void {
+		service.mView.init_touch_position = null;
+		service.mView.current_touch_position = null;
+		service.mView.cursor_position = null;
+		setVisibility(View.VISIBLE);
 	}
 }

@@ -4,6 +4,10 @@
 
 BezelCursor lets you access the whole screen with just the thumb of your holding hand, no matter how large the screen is. With a fixed, comfortable grip of a mobile touch device, you can use BezelCursor to easily and quickly trigger a button located anywhere on the screen, using a single fluid action. Your other hand will be free, to write note, to hold a bag, to do whatever you want.
 
+## Download
+
+From Google Play Store: https://play.google.com/store/apps/details?id=net.onthewings.bezelcursor
+
 ## How to activate
 
  1. Go to Settings -> Accessibility -> BezelCursor.

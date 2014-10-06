@@ -1,4 +1,4 @@
-# BezelCursor
+![BezelCursor](res/drawable/bezel_cursor_method.png)
 
 **warning: root is required**
 

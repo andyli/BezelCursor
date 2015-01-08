@@ -1,5 +1,7 @@
 ![BezelCursor](res/drawable/bezel_cursor_method.png)
 
+[![Build Status](https://travis-ci.org/andyli/hxAnonCls.svg?branch=master)](https://travis-ci.org/andyli/hxAnonCls)
+
 **warning: root is required**
 
 BezelCursor lets you access the whole screen with just the thumb of your holding hand, no matter how large the screen is. With a fixed, comfortable grip of a mobile touch device, you can use BezelCursor to easily and quickly trigger a button located anywhere on the screen, using a single fluid action. Your other hand will be free, to write note, to hold a bag, to do whatever you want.

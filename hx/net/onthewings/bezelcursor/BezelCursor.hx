@@ -12,6 +12,7 @@ import android.view.ViewGroup.ViewGroup_LayoutParams.*;
 import android.view.WindowManager.WindowManager_LayoutParams.*;
 import com.crittercism.app.Crittercism;
 
+@:nativeGen
 class BezelCursor extends AccessibilityService {
 	var inited:Bool = false;
     public var mView(get, null):OverlayView;
@@ -30,7 +31,7 @@ class BezelCursor extends AccessibilityService {
         );
     }
     
-    @:overload function onAccessibilityEvent(event:AccessibilityEvent):Void {
+    @:overload override function onAccessibilityEvent(event:AccessibilityEvent):Void {
 //    	log("AccessibilityEvent " + AccessibilityEvent.eventTypeToString(event.getEventType()))
 //    	
 //    	event.getEventType() match {
@@ -55,15 +56,15 @@ class BezelCursor extends AccessibilityService {
     	
     }
 
-    @:overload function onInterrupt():Void {
+    @:overload override function onInterrupt():Void {
     	
     }
 
-    @:overload function onServiceConnected():Void {
+    @:overload override function onServiceConnected():Void {
     	log("onServiceConnected");
     }
     
-    @:overload function onCreate():Void {
+    @:overload override function onCreate():Void {
         super.onCreate();
         
         init();
@@ -108,7 +109,7 @@ class BezelCursor extends AccessibilityService {
         inited = true;
     }
     
-    @:overload function onDestroy():Void {
+    @:overload override function onDestroy():Void {
     	if (inited) {
     		var wm:WindowManager = getSystemService(Context.WINDOW_SERVICE);
 	    	wm.removeView(mView);

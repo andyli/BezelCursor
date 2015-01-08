@@ -99,7 +99,7 @@ class OverlayView extends View {
 	}
 	
 	var lastMillis:Int64 = Int64.ofInt(-1);
-	@:overload function onDraw(canvas:Canvas):Void {
+	@:overload override function onDraw(canvas:Canvas):Void {
 		var currentMillis = System.currentTimeMillis();
 		if (lastMillis.isNeg()) {
 			lastMillis = currentMillis;

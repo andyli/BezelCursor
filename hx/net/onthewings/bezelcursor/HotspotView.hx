@@ -24,7 +24,7 @@ class HotspotViewBroadcastReceiver extends BroadcastReceiver {
 		this.view = view;
 	}
 
-	@:overload function onReceive(context:Context, myIntent:Intent):Void {
+	@:overload override function onReceive(context:Context, myIntent:Intent):Void {
 		if (myIntent.getAction() == Intent.ACTION_CONFIGURATION_CHANGED) {
 			var wm:WindowManager = view.service.getSystemService(Context.WINDOW_SERVICE);
 			wm.removeView(view);
@@ -33,6 +33,7 @@ class HotspotViewBroadcastReceiver extends BroadcastReceiver {
 	}
 }
 
+@:nativeGen
 class HotspotView extends View {
 	public var side(default, null):HotspotViewSide;
 	public var service(default, null):BezelCursor;
@@ -62,12 +63,12 @@ class HotspotView extends View {
 		addToWindow();
 	}
 
-	@:overload public function onAttachedToWindow():Void {
+	@:overload override public function onAttachedToWindow():Void {
 		super.onAttachedToWindow();
 		service.registerReceiver(broadcastReceiver, filter);
 	}
 
-	@:overload public function onDetachedFromWindow():Void {
+	@:overload override public function onDetachedFromWindow():Void {
 		cancel();
 		service.unregisterReceiver(broadcastReceiver);
 		super.onDetachedFromWindow();
@@ -93,11 +94,11 @@ class HotspotView extends View {
 		wm.addView(this, layoutParams);
 	}
 	
-	@:overload function onDraw(canvas:Canvas):Void {
+	@:overload override function onDraw(canvas:Canvas):Void {
 		canvas.drawRect(0, 0, width, getHeight(), paint);
 	}
 	
-	@:overload function onTouchEvent(evt:MotionEvent):Bool {
+	@:overload override function onTouchEvent(evt:MotionEvent):Bool {
 		//log("onTouchEvent " + evt.getRawX() + "," + evt.getRawY() + "," + evt.getAction())
 		
 		function get_cursor_position(x:Float, y:Float):PointF {

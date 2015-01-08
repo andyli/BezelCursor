@@ -176,7 +176,7 @@ class InputStreamHandler extends Thread {
     start();
   }
 
-  @:overload public function run():Void {
+  @:overload override public function run():Void {
     try {
       if (sink) {
         while (stream.read() != -1) {}

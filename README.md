@@ -1,6 +1,6 @@
 ![BezelCursor](res/drawable/bezel_cursor_method.png)
 
-[![Build Status](https://travis-ci.org/andyli/hxAnonCls.svg?branch=master)](https://travis-ci.org/andyli/hxAnonCls)
+[![Build Status](https://travis-ci.org/andyli/BezelCursor.svg?branch=master)](https://travis-ci.org/andyli/BezelCursor)
 
 **warning: root is required**
 

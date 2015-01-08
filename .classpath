@@ -5,6 +5,6 @@
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
-	<classpathentry kind="lib" path="libs/crittercism_v4_5_4_sdkonly.jar"/>
+	<classpathentry kind="lib" path="libs/crittercism_v5_0_4_sdkonly.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

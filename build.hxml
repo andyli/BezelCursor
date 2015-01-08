@@ -3,6 +3,6 @@ net.onthewings.bezelcursor.BezelCursor
 -cp hx
 -lib hxLINQ
 -lib tweenx
--java-lib /usr/local/opt/android-sdk/platforms/android-15/android.jar
 -java-lib libs/crittercism_v5_0_4_sdkonly.jar
 -D no-compilation
+--macro net.onthewings.bezelcursor.Android.setTarget(15)

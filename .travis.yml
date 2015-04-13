@@ -3,10 +3,15 @@ android:
   components:
     - build-tools-21.1.2
     - android-15
+env:
+  global:
+    # haxe make variables
+    - OCAMLOPT=ocamlopt.opt
+    - ADD_REVISION=1
 
 install:
     - travis_retry sudo apt-get update -qq
-    - travis_retry sudo apt-get install ocaml zlib1g-dev libgc-dev -qq
+    - travis_retry sudo apt-get install ocaml-native-compilers zlib1g-dev libgc-dev -qq
     - travis_retry git clone https://github.com/HaxeFoundation/neko.git ~/neko
     - cd ~/neko && make os=linux -s && sudo make install -s && cd $TRAVIS_BUILD_DIR
     - travis_retry git clone --recursive https://github.com/HaxeFoundation/haxe.git ~/haxe
@@ -16,6 +21,9 @@ install:
     - haxelib install hxLINQ
     - haxelib install tweenx
     - haxelib git hxAnonCls https://github.com/andyli/hxAnonCls.git
+    - neko -version
+    - haxe -version
+    - haxelib list
 
 script:
     - haxe build.hxml

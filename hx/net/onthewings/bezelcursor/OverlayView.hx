@@ -9,6 +9,7 @@ import tweenx909.*;
 using Std;
 using haxe.Int64;
 
+@:nativeGen
 class OverlayView extends View {
 	var service:BezelCursor;
 	var current_bound = new Rect();
@@ -99,7 +100,7 @@ class OverlayView extends View {
 	
 	var lastMillis:Int64 = Int64.ofInt(-1);
 	@:overload override function onDraw(canvas:Canvas):Void {
-		var currentMillis = System.currentTimeMillis();
+		var currentMillis:Int64 = System.currentTimeMillis();
 		if (lastMillis.isNeg()) {
 			lastMillis = currentMillis;
 		}

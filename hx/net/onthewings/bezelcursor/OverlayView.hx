@@ -9,7 +9,6 @@ import tweenx909.*;
 using Std;
 using haxe.Int64;
 
-@:nativeGen
 class OverlayView extends View {
 	var service:BezelCursor;
 	var current_bound = new Rect();
@@ -107,17 +106,6 @@ class OverlayView extends View {
 		
 		if (cursor_position != null) {
 			TweenX.manualUpdate(currentMillis.sub(lastMillis).toInt() / 1000);
-
-			var bounds = [];//TODO getService().getBounds();
-			
-			for (bound in bounds) {
-				if (bound._2) {
-					canvas.drawRect(bound._1, clickable_bounds_paint);
-				} else {
-					canvas.drawRect(bound._1, bounds_paint);
-				}
-			}
-			canvas.drawRect(current_bound, current_bound_paint);
 			
 			var drag_vec = new PointF(cursor_position.x - init_touch_position.x, cursor_position.y - init_touch_position.y);
 			var drag_len = drag_vec.length();

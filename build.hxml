@@ -3,6 +3,8 @@ net.onthewings.bezelcursor.BezelCursor
 -cp hx
 -lib hxLINQ
 -lib tweenx
+-lib hxAnonCls
 -java-lib libs/crittercism_v5_0_4_sdkonly.jar
 -D no-compilation
 --macro net.onthewings.bezelcursor.Android.setTarget(15)
+--macro hxAnonCls.Macros.buildAll()

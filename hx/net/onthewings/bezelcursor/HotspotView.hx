@@ -16,24 +16,6 @@ enum HotspotViewSide {
 	Right;
 }
 
-class HotspotViewBroadcastReceiver extends BroadcastReceiver {
-	var view:HotspotView;
-
-	public function new(view:HotspotView):Void {
-		super();
-		this.view = view;
-	}
-
-	@:overload override function onReceive(context:Context, myIntent:Intent):Void {
-		if (myIntent.getAction() == Intent.ACTION_CONFIGURATION_CHANGED) {
-			var wm:WindowManager = view.service.getSystemService(Context.WINDOW_SERVICE);
-			wm.removeView(view);
-			view.addToWindow();
-		}
-	}
-}
-
-@:nativeGen
 class HotspotView extends View {
 	public var side(default, null):HotspotViewSide;
 	public var service(default, null):BezelCursor;
@@ -42,8 +24,20 @@ class HotspotView extends View {
 	var paint = new Paint();
 	var down_position = new PointF();
 	var current_position = new PointF();
-	var broadcastReceiver:HotspotViewBroadcastReceiver;
+	var broadcastReceiver(get, null):BroadcastReceiver;
 	var filter:IntentFilter;
+
+	function get_broadcastReceiver() {
+		return broadcastReceiver != null ? broadcastReceiver : broadcastReceiver = (new BroadcastReceiver():{
+			@:overload override function onReceive(context:Context, myIntent:Intent):Void {
+				if (myIntent.getAction() == Intent.ACTION_CONFIGURATION_CHANGED) {
+					var wm:WindowManager = service.getSystemService(Context.WINDOW_SERVICE);
+					wm.removeView(parent);
+					addToWindow();
+				}
+			}
+		});
+	}
 
 	public function new(service:BezelCursor, side:HotspotViewSide):Void {
 		super(service);
@@ -58,7 +52,6 @@ class HotspotView extends View {
 
 		filter = new IntentFilter();
 		filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-		broadcastReceiver = new HotspotViewBroadcastReceiver(this);
 
 		addToWindow();
 	}

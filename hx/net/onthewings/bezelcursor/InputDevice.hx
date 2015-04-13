@@ -16,10 +16,10 @@ class InputDevice {
 		java.lang.System.loadLibrary("TouchService");
 	}
 
-	@:native static public function getDebugEnabled():Bool return throw "jni";
-	@:native static public function setDebugEnabled(enable:Bool):Bool return throw "jni";
-	@:native static public function OpenDev(devicePath:String):Int return throw "jni";
-	@:native static public function SendEvent(devicePath:String, _type:Int, code:Int, value:Int):Int return throw "jni";
+	@:native static public function getDebugEnabled():Bool;
+	@:native static public function setDebugEnabled(enable:Bool):Bool;
+	@:native static public function OpenDev(devicePath:String):Int;
+	@:native static public function SendEvent(devicePath:String, _type:Int, code:Int, value:Int):Int;
 	
 	
 	/**

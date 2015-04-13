@@ -34,7 +34,7 @@ class Shell {
   static var shell:String;
 
   // uid=0(root) gid=0(root)
-  static var UID_PATTERN = Pattern._compile("^uid=(\\d+).*?");
+  static var UID_PATTERN = Pattern.compile("^uid=(\\d+).*?");
 
   inline static var EXIT = "exit\n";
 
@@ -159,7 +159,6 @@ class Shell {
   }
 }
 
-@:nativeGen
 class InputStreamHandler extends Thread {
   private var stream:InputStream;
   private var sink:Bool;

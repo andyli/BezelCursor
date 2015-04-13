@@ -15,6 +15,7 @@ install:
     - haxelib install hxjava
     - haxelib install hxLINQ
     - haxelib install tweenx
+    - haxelib git hxAnonCls https://github.com/andyli/hxAnonCls.git
 
 script:
     - haxe build.hxml

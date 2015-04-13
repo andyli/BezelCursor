@@ -4,7 +4,7 @@ import net.onthewings.bezelcursor.Utils.*;
 import net.onthewings.bezelcursor.LinuxInput.*;
 import android.view.*;
 import android.graphics.Point;
-import android.os.Build_VERSION;
+import android.os.Build.Build_VERSION;
 
 using Std;
 using Lambda;
@@ -46,7 +46,7 @@ class TouchInputDevice extends net.onthewings.bezelcursor.InputDevice {
 	*/
 	public function displayToDevice(x:Float, y:Float):Point {
 		var displaySize = new Point();
-		if ((untyped __java__("android.os.Build.VERSION.SDK_INT")) >= 13) {
+		if (Build_VERSION.SDK_INT >= 13) {
 			display.getSize(displaySize);
 		} else {
 			displaySize.set(display.getWidth(), display.getHeight());

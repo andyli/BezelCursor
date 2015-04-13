@@ -20,6 +20,7 @@ install:
     - haxelib install hxjava
     - haxelib install hxLINQ
     - haxelib install tweenx
+    - haxelib install tink_macro
     - haxelib git hxAnonCls https://github.com/andyli/hxAnonCls.git
     - neko -version
     - haxe -version
